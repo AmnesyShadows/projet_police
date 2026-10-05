@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+
+    <meta charset="utf-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width,initial-scale=1"
+    >
+
+    <title>SASP Nord — Administration — Zones</title>
+
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+
+    <!-- MÊME CSS QUE LIEUX -->
+
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="../css/login.css">
+
+</head>
+
+
+<body id="filigrane">
+
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
+<header>
+
+    <a href="../index.html" class="admin-brand">
+
+        <strong>SASP Nord</strong>
+
+        <span>
+            Administration — Zones
+        </span>
+
+    </a>
+
+    <strong id="admin-logged" class="admin-title hidden">
+        🔒 Administrateur
+    </strong>
+
+    <div>
+
+        <button
+            id="logout"
+            class="danger hidden"
+            type="button"
+        >
+            Déconnexion
+        </button>
+
+    </div>
+
+</header>
+
+<!-- =====================================================
+     ADMINISTRATION
+===================================================== -->
+
+<section
+    id="admin"
+    class="hidden"
+>
+
+
+    <!-- =================================================
+         SIDEBAR
+    ================================================== -->
+
+    <aside>
+
+        <div class="section-header">
+
+            <div class="section-title">
+
+                <h2>
+                    Zones
+                </h2>
+
+            </div>
+
+
+            <button
+                id="new"
+                class="primary"
+                type="button"
+            >
+                + Nouvelle zone
+            </button>
+
+        </div>
+
+        <input
+            id="search"
+            placeholder="Rechercher..."
+        >
+
+        <div id="zones-content">
+
+            <div id="list"></div>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- =================================================
+         CONTENU PRINCIPAL
+    ================================================== -->
+
+    <main>
+
+
+        <!-- TITRE -->
+
+        <div class="row">
+
+            <div>
+
+                <h2 id="title">
+                    Nouvelle zone
+                </h2>
+
+
+                <p id="status">
+                    Création d'une zone
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <button
+                    id="delete"
+                    class="danger hidden"
+                    type="button"
+                >
+                    Supprimer
+                </button>
+
+
+                <button
+                    id="save"
+                    class="primary"
+                    type="button"
+                >
+                    Enregistrer
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             FORMULAIRE
+        ================================================== -->
+
+        <form id="form">
+
+
+            <!-- NOM -->
+
+            <label>
+
+                Nom
+
+                <input
+                    id="name"
+                    required
+                >
+
+            </label>
+
+
+
+            <!-- TYPE -->
+            <input id="type" type="hidden">
+            <!-- <label>
+
+                Type
+
+                <select
+                    id="type"
+                    required
+                ></select>
+
+            </label> -->
+
+
+
+            <!-- COULEUR -->
+
+            <label id="color-field">
+
+                Couleur
+
+                <input
+                    id="color"
+                    type="color"
+                    value="#10d1d1"
+                >
+
+            </label>
+
+
+
+            <!-- DESCRIPTION -->
+
+            <label class="full">
+
+                Description
+
+                <textarea
+                    id="description"
+                    rows="4"
+                ></textarea>
+
+            </label>
+
+
+
+            <!-- VISIBILITÉ -->
+
+            <label class="check full">
+
+                <input
+                    id="visible"
+                    type="checkbox"
+                    checked
+                >
+
+                Visible sur la carte
+
+            </label>
+
+
+
+            <!-- =================================================
+                 CONTRÔLES ZONE
+            ================================================== -->
+
+            <div
+                id="zone-controls"
+                class="full"
+            >
+
+                <div class="row">
+
+                    <h3>
+                        Zone
+                    </h3>
+
+
+                    <span id="zone-point-count">
+                        Points : 0
+                    </span>
+
+                </div>
+
+
+                <div class="row">
+
+                    <button
+                        type="button"
+                        id="undo-zone-point"
+                    >
+                        ↩ Retirer le dernier point
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="clear-zone"
+                        class="danger"
+                    >
+                        Effacer la zone
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 CARTE
+            ================================================== -->
+
+            <div class="full">
+
+                <div id="map"></div>
+
+            </div>
+
+
+
+        </form>
+
+    </main>
+
+</section>
+
+
+
+<!-- =====================================================
+     SCRIPTS
+===================================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="../js/login.js"></script>
+<script src="js/zones.js"></script>
+
+</body>
+
+</html>

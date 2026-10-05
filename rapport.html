@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+
+    <meta charset="utf-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>SASP Nord — Rapport d'intervention</title>
+
+    <link
+        rel="stylesheet"
+        href="css/board.css"
+    >
+
+    <style>
+
+        .rapport-page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 25px;
+        }
+
+        .rapport-section {
+            margin-bottom: 35px;
+        }
+
+        .rapport-section h2 {
+            margin: 0 0 8px;
+            font-size: 24px;
+        }
+
+        .rapport-section-subtitle {
+            margin: 0 0 20px;
+            color: #888;
+        }
+
+        .rapport-grid {
+            display: grid;
+            grid-template-columns: repeat(
+                2,
+                minmax(0, 1fr)
+            );
+            gap: 18px;
+        }
+
+        .rapport-full {
+            grid-column: 1 / -1;
+        }
+
+        .rapport-block {
+            padding: 20px;
+
+            background: #181818;
+            border: 1px solid #333;
+            border-radius: 10px;
+
+            margin-bottom: 15px;
+        }
+
+        .rapport-block-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 15px;
+
+            margin-bottom: 18px;
+        }
+
+        .rapport-block-header h3 {
+            margin: 0;
+        }
+
+        .rapport-remove {
+            background: #8f2424;
+            border-color: #8f2424;
+            color: #fff;
+        }
+
+        .rapport-remove:hover {
+            background: #b12d2d;
+        }
+
+        .rapport-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .rapport-preview {
+            margin-top: 40px;
+        }
+
+        #rapport-output {
+            width: 100%;
+            min-height: 600px;
+
+            padding: 20px;
+
+            background: #101010;
+            border: 1px solid #333;
+            border-radius: 8px;
+
+            color: #eee;
+
+            font-family:
+                Consolas,
+                Monaco,
+                monospace;
+
+            font-size: 14px;
+            line-height: 1.6;
+
+            resize: vertical;
+        }
+
+        .checkbox-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .agent-check {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+
+            gap: 8px;
+
+            padding: 9px 12px;
+
+            background: #1b1b1b;
+            border: 1px solid #303030;
+            border-radius: 6px;
+
+            cursor: pointer;
+        }
+
+        .agent-check:hover {
+            border-color: #555;
+        }
+
+        .agent-check input {
+            width: auto;
+        }
+
+        @media (max-width: 800px) {
+
+            .rapport-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .rapport-full {
+                grid-column: auto;
+            }
+
+            .rapport-page {
+                padding: 25px 15px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<div id="custom-modal" class="custom-modal hidden">
+    <div class="custom-modal-overlay"></div>
+
+    <div class="custom-modal-box">
+
+        <div id="custom-modal-icon" class="custom-modal-icon">
+            ⚠️
+        </div>
+
+        <h3 id="custom-modal-title">
+            Formulaire incomplet
+        </h3>
+
+        <p id="custom-modal-message"></p>
+
+        <div
+            id="custom-modal-content"
+            class="custom-modal-content"
+        ></div>
+
+        <button
+            type="button"
+            id="custom-modal-close"
+            class="primary"
+        >
+            Fermer
+        </button>
+
+    </div>
+</div>
+
+<body id="filigrane">
+
+<header>
+
+    <a
+        href="index.html"
+        class="admin-brand"
+    >
+
+        <strong>SASP Nord</strong>
+
+        <span>
+            Rapport d'intervention
+        </span>
+
+    </a>
+</header>
+
+
+
+<main class="rapport-page">
+
+
+    <div class="row">
+
+        <div>
+
+            <h1>
+                Rapport d’intervention / arrestation
+            </h1>
+
+            <p>
+                Remplissez les informations du rapport.
+            </p>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         1. INFORMATIONS GÉNÉRALES
+    ====================================================== -->
+
+    <section class="rapport-section">
+
+        <h2>
+            1. Informations générales
+        </h2>
+
+        <p class="rapport-section-subtitle">
+            Informations principales concernant l'intervention.
+        </p>
+
+
+        <div class="rapport-block">
+
+            <div class="rapport-grid">
+
+
+                <label class="rapport-full">
+
+                    Agents présents
+
+                    <div
+                        id="agents-list"
+                        class="checkbox-list"
+                    ></div>
+
+                </label>
+
+
+                <label>
+
+                    Date
+
+                    <input
+                        id="date"
+                        type="date"
+                        required
+                    >
+
+                </label>
+
+
+                <label>
+
+                    Heure
+
+                    <input
+                        id="heure"
+                        type="time"
+                        required
+                    >
+
+                </label>
+
+
+                <label>
+                    Lieu
+
+                    <input
+                        id="lieu"
+                        type="text"
+                        placeholder="Lieu de l'intervention"
+                        required
+                    >
+                </label>
+
+
+                <label>
+
+                    Motif de l’intervention
+
+                    <input
+                        id="motif"
+                        type="text"
+                        placeholder="Motif de l'intervention"
+                        required
+                    >
+
+                </label>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         2. DÉROULEMENT DES FAITS
+    ====================================================== -->
+
+    <section class="rapport-section">
+
+        <h2>
+            2. Déroulement des faits
+        </h2>
+
+        <p class="rapport-section-subtitle">
+            Décrire précisément les faits et le déroulement de l'intervention.
+        </p>
+
+
+        <div class="rapport-block">
+
+            <label>
+
+                Déroulement des faits
+
+                <textarea
+                    id="faits"
+                    rows="10"
+                    placeholder="Décrivez précisément les faits..."
+                    required
+                ></textarea>
+
+                <button
+                    id="reformuler-faits"
+                    type="button"
+                    class="primary"
+                >
+                    ✨ Reformuler avec ChatGPT (coller le texte copié automatiquement)
+                </button>
+
+            </label>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         3. INDIVIDUS
+    ====================================================== -->
+
+    <section class="rapport-section">
+
+        <h2>
+            3. Individus impliqués
+        </h2>
+
+        <p class="rapport-section-subtitle">
+            Ajoutez les individus impliqués dans l'intervention.
+        </p>
+
+
+        <div id="individus-container"></div>
+
+
+        <button
+            id="add-individu"
+            class="primary"
+            type="button"
+        >
+            + Ajouter un individu
+        </button>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         4. VEHICULES
+    ====================================================== -->
+
+    <section class="rapport-section">
+
+        <h2>
+            4. Véhicules
+        </h2>
+
+        <p class="rapport-section-subtitle">
+            Ajoutez les véhicules concernés.
+        </p>
+
+
+        <div id="vehicules-container"></div>
+
+
+        <button
+            id="add-vehicule"
+            class="primary"
+            type="button"
+        >
+            + Ajouter un véhicule
+        </button>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         5. VICTIMES / OTAGES
+    ====================================================== -->
+
+    <section class="rapport-section">
+
+        <h2>
+            5. Otages / Victimes
+        </h2>
+
+        <p class="rapport-section-subtitle">
+            Ajoutez les victimes ou otages concernés.
+        </p>
+
+
+        <div id="victimes-container"></div>
+
+
+        <button
+            id="add-victime"
+            class="primary"
+            type="button"
+        >
+            + Ajouter une victime / otage
+        </button>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         6. AGENT REDACTEUR
+    ====================================================== -->
+
+    <section class="rapport-section">
+
+        <h2>
+            6. Agent rédacteur
+        </h2>
+
+        <div class="rapport-block">
+
+            <div class="rapport-grid">
+
+                <label>
+
+                    Agent
+
+                    <select id="redacteur" required>
+
+                        <option value="">
+                            Sélectionner un agent
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+                <label>
+
+                    Matricule
+
+                    <input
+                        id="redacteur-matricule"
+                        type="text"
+                        placeholder="Matricule"
+                        readonly
+                    >
+
+                </label>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         ACTIONS
+    ====================================================== -->
+
+    <div class="rapport-actions">
+
+        <button
+            id="generate"
+            class="primary"
+            type="button"
+        >
+            Générer le rapport
+        </button>
+
+
+        <button
+            id="copy"
+            type="button"
+        >
+            Copier
+        </button>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         APERCU
+    ====================================================== -->
+
+    <section class="rapport-preview">
+
+        <h2>
+            Aperçu du rapport
+        </h2>
+
+        <p class="rapport-section-subtitle">
+            Le rapport généré apparaîtra ici.
+        </p>
+
+
+        <div
+            id="rapport-output"
+            class="rapport-output"
+        >
+            Cliquez sur « Générer le rapport »...
+        </div>
+
+    </section>
+
+
+</main>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="js/rapport.js"></script>
+
+
+</body>
+
+</html>

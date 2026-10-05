@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Components Test — Rivage</title>
+
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/components.css">
+
+</head>
+
+<body>
+
+<script src="../js/components/layout.js"></script>
+<script src="../js/components/cards.js"></script>
+<script src="../js/components/table.js"></script>
+<script src="../js/components/modal.js"></script>
+<script src="../js/components/title.js"></script>
+<script src="../js/components/badge.js"></script>
+<script src="../js/components/alert.js"></script>
+<script src="../js/config/agents.config.js"></script>
+
+<script>
+
+    createLayout({
+
+        title: "Components Test",
+
+        subtitle:
+            "Bibliothèque des composants V2",
+
+        activePage:
+            "components-test"
+
+    });
+
+
+    const content =
+        document.getElementById(
+            "page-content"
+        );
+
+    content.innerHTML = `
+
+        <!-- ================================================== -->
+        <!-- GROUPE 1 — 6 CARDS / 4 PAR LIGNE -->
+        <!-- ================================================== -->
+
+        <h2 style="
+            margin: 0 0 15px;
+        ">
+            6 Cards — 4 par ligne
+        </h2>
+
+
+        <div class="card-grid cards-4">
+
+            <div id="card-test-1"></div>
+
+            <div id="card-test-2"></div>
+
+            <div id="card-test-3"></div>
+
+            <div id="card-test-4"></div>
+
+            <div id="card-test-5"></div>
+
+            <div id="card-test-6"></div>
+
+        </div>
+
+
+        <!-- ESPACE -->
+
+        <div style="
+            height: 40px;
+        "></div>
+
+
+        <!-- ================================================== -->
+        <!-- GROUPE 2 — 4 CARDS / 2 PAR LIGNE -->
+        <!-- ================================================== -->
+
+        <h2 style="
+            margin: 0 0 15px;
+        ">
+            4 Cards — 2 par ligne
+        </h2>
+
+
+        <div class="card-grid cards-2">
+
+            <div id="card-test-7"></div>
+
+            <div id="card-test-8"></div>
+
+            <div id="card-test-9"></div>
+
+            <div id="card-test-10"></div>
+
+        </div>
+
+        <div style="
+            height: 40px;
+        "></div>
+
+
+        <!-- ================================================== -->
+        <!-- TABLE TEST -->
+        <!-- ================================================== -->
+
+        <h2 style="
+            margin: 0 0 15px;
+        ">
+            Table — Agents
+        </h2>
+
+
+        <div id="table-test"></div>
+        <div id="table-test2"></div>
+        <div id="table-test3"></div>
+        
+
+        <div style="
+            height: 40px;
+        "></div>
+
+
+        <!-- ================================================== -->
+        <!-- MODAL TEST -->
+        <!-- ================================================== -->
+
+        <h2 style="
+            margin: 0 0 15px;
+        ">
+            Modal — Test
+        </h2>
+
+
+        <button
+            type="button"
+            class="modal-button primary"
+            id="open-modal-test"
+        >
+            Ouvrir la modal
+        </button>
+        <h3 style="margin: 30px 0 15px;">
+            Badges
+        </h3>
+
+        <div id="badge-tests" style="display: flex; gap: 10px; flex-wrap: wrap;">
+        </div>
+
+        <h3 style="margin: 30px 0 15px;">
+            Alerts
+        </h3>
+
+        <div id="alert-tests" style="display: flex; flex-direction: column; gap: 10px;">
+        </div>
+    `;
+
+    content.prepend(
+        createPageTitle(
+            "Table — Agentssss",
+            "Gestion et administration des agents"
+        )
+    );
+
+
+    // ========================================================
+    // GROUPE 1
+    // ========================================================
+
+    document
+        .getElementById("card-test-1")
+        .appendChild(
+
+            createCard({
+
+                icon: "👮",
+
+                title:
+                    "Tyler Turner",
+
+                subtitle: `
+                    <span class="card-matricule">
+                        #101
+                    </span>
+                `,
+
+                content: `
+
+                    <strong>
+                        Rookie
+                    </strong>
+
+                    <br>
+
+                    ${createBadge("Actif", "danger").outerHTML}
+
+                `,
+
+                footer:
+                    "FTI : John Doe"
+
+            })
+
+        );
+
+
+    document
+        .getElementById("card-test-2")
+        .appendChild(
+
+            createCard({
+
+                icon: "👮",
+
+                title:
+                    "John Doe",
+
+                subtitle:
+                    "Agent #102",
+
+                content: `
+
+                    <strong>
+                        Sergent
+                    </strong>
+
+                    <br>
+
+                    <span style="
+                        color: var(--success);
+                    ">
+                        ● Actif
+                    </span>
+
+                `
+
+            })
+
+        );
+
+
+    document
+        .getElementById("card-test-3")
+        .appendChild(
+
+            createCard({
+
+                icon: "👮",
+
+                title:
+                    "Jane Doe",
+
+                subtitle:
+                    "Agent #103",
+
+                content: `
+
+                    <strong>
+                        Lieutenant
+                    </strong>
+
+                    <br>
+
+                    <span style="
+                        color: var(--danger);
+                    ">
+                        ● Inactif
+                    </span>
+
+                `
+
+            })
+
+        );
+
+
+    document
+        .getElementById("card-test-4")
+        .appendChild(
+
+            createCard({
+
+                icon: "📁",
+
+                title:
+                    "Dossier #001",
+
+                subtitle:
+                    "Enquête",
+
+                content: `
+
+                    <span style="
+                        color: var(--warning);
+                    ">
+                        En cours
+                    </span>
+
+                `,
+
+                footer:
+                    "Dernière modification : Aujourd'hui"
+
+            })
+
+        );
+
+
+    document
+        .getElementById("card-test-5")
+        .appendChild(
+
+            createCard({
+
+                icon: "📊",
+
+                title:
+                    "Statistiques",
+
+                subtitle:
+                    "Agents",
+
+                content: `
+
+                    <strong style="
+                        font-size: 30px;
+                        color: var(--accent);
+                    ">
+                        124
+                    </strong>
+
+                    <div style="
+                        margin-top: 4px;
+                        color: var(--text-muted);
+                    ">
+                        Agents enregistrés
+                    </div>
+
+                `
+
+            })
+
+        );
+
+
+    document
+        .getElementById("card-test-6")
+        .appendChild(
+
+            createCard({
+
+                icon: "📍",
+
+                title:
+                    "Carte",
+
+                subtitle:
+                    "Rivage",
+
+                content: `
+
+                    <span style="
+                        color: var(--text-secondary);
+                    ">
+                        32 lieux enregistrés
+                    </span>
+
+                `
+
+            })
+
+        );
+
+
+    // ========================================================
+    // GROUPE 2
+    // ========================================================
+
+    document
+        .getElementById("card-test-7")
+        .appendChild(
+
+            createCard({
+
+                icon: "🚔",
+
+                title:
+                    "Patrouilles",
+
+                subtitle:
+                    "Aujourd'hui",
+
+                content: `
+
+                    <strong style="
+                        font-size: 30px;
+                        color: var(--accent);
+                    ">
+                        18
+                    </strong>
+
+                    <div style="
+                        margin-top: 4px;
+                        color: var(--text-muted);
+                    ">
+                        Patrouilles effectuées
+                    </div>
+
+                `
+
+            })
+
+        );
+
+
+    document
+        .getElementById("card-test-8")
+        .appendChild(
+
+            createCard({
+
+                icon: "📄",
+
+                title:
+                    "Rapports",
+
+                subtitle:
+                    "Cette semaine",
+
+                content: `
+
+                    <strong style="
+                        font-size: 30px;
+                        color: var(--accent);
+                    ">
+                        47
+                    </strong>
+
+                    <div style="
+                        margin-top: 4px;
+                        color: var(--text-muted);
+                    ">
+                        Rapports créés
+                    </div>
+
+                `
+
+            })
+
+        );
+
+
+    document
+        .getElementById("card-test-9")
+        .appendChild(
+
+            createCard({
+
+                icon: "⚠️",
+
+                title:
+                    "Alertes",
+
+                subtitle:
+                    "En cours",
+
+                content: `
+
+                    <strong style="
+                        font-size: 30px;
+                        color: var(--warning);
+                    ">
+                        3
+                    </strong>
+
+                    <div style="
+                        margin-top: 4px;
+                        color: var(--text-muted);
+                    ">
+                        Alertes actives
+                    </div>
+
+                `
+
+            })
+
+        );
+
+
+    document
+        .getElementById("card-test-10")
+        .appendChild(
+
+            createCard({
+
+                title:
+                    "Sécurité",
+
+                subtitle:
+                    "Système",
+
+                content: `
+
+                    <span style="
+                        color: var(--success);
+                    ">
+                        ● Opérationnel
+                    </span>
+
+                `,
+
+                footer:
+                    "Dernière vérification : maintenant"
+
+            })
+
+        );
+
+        // ========================================================
+        // TABLE TEST
+        // ========================================================
+
+        const agentsTest = [
+
+            {
+                id: 1,
+                nom: "Turner",
+                prenom: "Tyler",
+                matricule: "101",
+                grade: "",
+                actif: true,
+                date_arrivee: "2026-01-15",
+                fti: ""
+            },
+
+            {
+                id: 2,
+                nom: "Doe",
+                prenom: "John",
+                matricule: "102",
+                grade: "",
+                actif: true,
+                date_arrivee: "2025-08-10",
+                fti: ""
+            },
+
+            {
+                id: 3,
+                nom: "Doe",
+                prenom: "Jane",
+                matricule: "103",
+                grade: "",
+                actif: false,
+                date_arrivee: "2024-03-20",
+                fti: ""
+            }
+
+        ];
+
+
+        document
+            .getElementById("table-test")
+            .appendChild(
+
+                createTable({
+
+                    config: agentsConfig,
+
+                    data: agentsTest,
+
+                    columns: [
+
+                        {
+                            key: "nom",
+                            label: "Nom"
+                        },
+
+                        {
+                            key: "prenom",
+                            label: "Prénom"
+                        },
+
+                        {
+                            key: "matricule",
+                            label: "Matricule"
+                        },
+
+                        {
+                            key: "grade",
+                            label: "Grade"
+                        },
+
+                        {
+                            label: "Actions",
+
+                            buttons: [
+                                "show",
+                                "edit",
+                                "delete"
+                            ]
+
+                        }
+
+                    ],
+
+                    onDelete: async (agent) => {
+
+                        console.log(
+                            "Agent supprimé :",
+                            agent
+                        );
+
+                    }
+
+                })
+
+            );
+
+        document
+            .getElementById("table-test2")
+            .appendChild(
+                createTable({
+                    columns: [
+                        {
+                            key: "nom",
+                            label: "Nom"
+                        },
+                        {
+                            key: "matricule",
+                            label: "Matricule"
+                        },
+                        {
+                            key: "grade",
+                            label: "Grade"
+                        },
+                        {
+                            key: "actif",
+                            label: "Statut",
+                            render: (value) => {
+                                return value
+                                    ? createBadge("Actif", "success").outerHTML
+                                    : createBadge("Inactif", "danger").outerHTML;
+                            }
+                        }
+                    ],
+                    data: agentsTest,
+                    onRowClick: (agent) => {
+                        window.location.href =
+                            `agent.html?id=${agent.id}`;
+                    }
+
+                })
+
+            );
+
+        document
+            .getElementById("table-test3")
+            .appendChild(
+
+                createTable({
+
+                    columns: [
+
+                        {
+                            key: "nom",
+                            label: "Nom"
+                        },
+
+                        {
+                            key: "matricule",
+                            label: "Matricule"
+                        },
+
+                        {
+                            key: "grade",
+                            label: "Grade"
+                        },
+
+                        {
+                            key: "statut",
+                            label: "Statut"
+                        },
+                        {
+                            label: "Actions",
+
+                            buttons: [
+
+                                {
+                                    type: "view",
+
+                                    action: (row) => {
+
+                                        window.location.href =
+                                            `agent.html?id=${row.id}`;
+
+                                    }
+
+                                },
+
+                                {
+                                    type: "edit",
+
+                                    action: (row) => {
+
+                                        window.location.href =
+                                            `agent-edit.html?id=${row.id}`;
+
+                                    }
+
+                                },
+
+                                {
+                                    type: "delete",
+
+                                    action: (row) => {
+
+                                        console.log(
+                                            "Suppression :",
+                                            row.id
+                                        );
+
+                                    }
+
+                                }
+
+                            ]
+
+                        }
+
+                    ],
+
+                    data: agentsTest,
+                    
+
+                })
+
+            );
+
+        // ========================================================
+        // MODAL TEST
+        // ========================================================
+
+        const testAgent = {
+
+            nom: "Turner",
+
+            prenom: "Tyler",
+
+            matricule: "101",
+
+            grade: "",
+
+            actif: true,
+
+            date_arrivee: "2026-01-15",
+
+            fti: ""
+
+        };
+
+
+        document
+            .getElementById("open-modal-test")
+            .addEventListener(
+                "click",
+                () => {
+
+                    createModal({
+
+                        config: agentsConfig,
+
+                        data: testAgent,
+
+                        title: "Modifier l'agent",
+
+                        onSave: (values, originalData) => {
+
+                            console.log(
+                                "Valeurs du formulaire :",
+                                values
+                            );
+
+                            console.log(
+                                "Données originales :",
+                                originalData
+                            );
+
+                        }
+
+                    });
+
+                }
+            );
+
+        // ================================
+        // BADGES
+        // ================================
+
+        const badgeTests = document.getElementById("badge-tests");
+
+        badgeTests.appendChild(
+            createBadge("Actif", "success")
+        );
+
+        badgeTests.appendChild(
+            createBadge("Inactif", "danger")
+        );
+
+        badgeTests.appendChild(
+            createBadge("En attente", "warning")
+        );
+
+        badgeTests.appendChild(
+            createBadge("Rookie", "accent")
+        );
+
+        badgeTests.appendChild(
+            createBadge("Information", "default")
+        );
+
+
+        // ================================
+        // ALERTS
+        // ================================
+
+        const alertTests = document.getElementById("alert-tests");
+
+        createAlert(
+            "L'agent a été enregistré avec succès.",
+            "success",
+            {
+                title: "Succès"
+            }
+        );
+        createAlert(
+            "Impossible de supprimer cet agent.",
+            "danger",
+            {
+                title: "Erreur"
+            }
+        );
+        createAlert(
+            "Cette action nécessite une confirmation.",
+            "warning",
+            {
+                title: "Attention"
+            }
+        );
+        createAlert(
+            "Les données seront synchronisées avec Supabase.",
+            "info",
+            {
+                title: "Information"
+            }
+        );
+
+</script>
+
+
+</body>
+
+</html>

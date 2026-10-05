@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width,initial-scale=1"
+    >
+
+    <title>SASP Nord — Administration — Peines</title>
+
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="../css/login.css">
+</head>
+
+<body id="filigrane">
+
+<header>
+
+    <a href="../index.html" class="admin-brand">
+        <strong>SASP Nord</strong>
+        <span>Administration — Peines</span>
+    </a>
+
+    <strong id="admin-logged" class="admin-title hidden">
+        🔒 Administrateur
+    </strong>
+
+    <div>
+
+        <button
+            id="logout"
+            class="danger hidden"
+            type="button"
+        >
+            Déconnexion
+        </button>
+
+    </div>
+
+</header>
+
+
+<!-- =====================================================
+     ADMINISTRATION
+===================================================== -->
+
+<section
+    id="admin"
+    class="hidden"
+>
+
+    <!-- =================================================
+         SIDEBAR
+    ================================================== -->
+
+    <aside>
+
+        <div class="section-header">
+
+            <div class="section-title">
+
+                <h2>
+                    Peines
+                </h2>
+
+            </div>
+
+            <button
+                id="new"
+                class="primary"
+                type="button"
+            >
+                + Nouvelle peine
+            </button>
+
+        </div>
+
+
+        <input
+            id="search"
+            placeholder="Rechercher..."
+        >
+
+
+        <div id="peines-content">
+
+            <div id="list"></div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =================================================
+         CONTENU PRINCIPAL
+    ================================================== -->
+
+    <main>
+
+        <div class="row">
+
+            <div>
+
+                <h2 id="title">
+                    Nouvelle peine
+                </h2>
+
+                <p id="status"></p>
+
+            </div>
+
+
+            <div>
+
+                <button
+                    id="delete"
+                    class="danger hidden"
+                    type="button"
+                >
+                    Supprimer
+                </button>
+
+                <button
+                    id="save"
+                    class="primary"
+                    type="button"
+                >
+                    Enregistrer
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             FORMULAIRE
+        ================================================== -->
+
+        <form id="form">
+
+            <!-- CATÉGORIE -->
+
+            <label>
+
+                Catégorie
+
+                <select
+                    id="categorie"
+                    required
+                ></select>
+
+            </label>
+
+            <!-- DÉLIT -->
+
+            <label>
+
+                Délit
+
+                <select
+                    id="delit"
+                    required
+                ></select>
+
+            </label>
+
+
+            <!-- ARTICLE -->
+
+            <label>
+
+                Article
+
+                <input
+                    id="article"
+                    required
+                >
+
+            </label>
+
+
+            <!-- INFRACTION -->
+
+            <label>
+
+                Infraction
+
+                <input
+                    id="infraction"
+                    required
+                >
+
+            </label>
+
+
+            <!-- DESCRIPTION -->
+
+            <label class="full">
+
+                Description
+
+                <textarea
+                    id="description"
+                    rows="4"
+                ></textarea>
+
+            </label>
+
+
+            <!-- NOMINAL -->
+
+            <label>
+
+                Nominal
+
+                <input
+                    id="nominal"
+                    type="number"
+                    step="any"
+                >
+
+            </label>
+
+
+            <!-- MAXIMAL -->
+
+            <label>
+
+                Maximal
+
+                <input
+                    id="maximal"
+                    type="number"
+                    step="any"
+                >
+
+            </label>
+
+
+            <!-- UNITE -->
+
+            <label class="check full">
+
+                <input
+                    id="unite"
+                    type="checkbox"
+                >
+
+                Unité
+
+            </label>
+
+
+            <!-- PEINE -->
+
+            <label class="full">
+
+                Peine
+
+                <textarea
+                    id="peine"
+                    rows="4"
+                ></textarea>
+
+            </label>
+
+        </form>
+
+    </main>
+
+</section>
+
+
+<!-- =====================================================
+     SCRIPTS
+===================================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/login.js"></script>
+<script src="js/peines.js"></script>
+</body>
+
+</html>

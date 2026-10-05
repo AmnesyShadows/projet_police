@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+
+    <meta charset="utf-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>SASP Nord — Suivi des agents</title>
+
+    <link
+        rel="stylesheet"
+        href="css/board.css"
+    >
+
+    <style>
+
+        .rapport-page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 25px;
+        }
+
+        .rapport-section {
+            margin-bottom: 35px;
+        }
+
+        .rapport-section h2 {
+            margin: 0 0 8px;
+            font-size: 24px;
+        }
+
+        .rapport-section-subtitle {
+            margin: 0 0 20px;
+            color: #888;
+        }
+
+        .rapport-grid {
+            display: grid;
+            grid-template-columns: repeat(
+                2,
+                minmax(0, 1fr)
+            );
+            gap: 18px;
+        }
+
+        .rapport-full {
+            grid-column: 1 / -1;
+        }
+
+        .rapport-block {
+            padding: 20px;
+            background: #181818;
+            border: 1px solid #333;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .rapport-block h3 {
+            margin: 0 0 15px;
+        }
+
+        .rapport-block-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+
+        .rapport-block-header h3 {
+            margin: 0;
+        }
+
+        .rapport-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .rapport-preview {
+            margin-top: 40px;
+        }
+
+        #rookie-output {
+            width: 100%;
+            min-height: 600px;
+            padding: 20px;
+            background: #101010;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #eee;
+            font-family:
+                Consolas,
+                Monaco,
+                monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+        }
+
+        .rookie-scale {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .rookie-scale span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 12px;
+            background: #1b1b1b;
+            border: 1px solid #303030;
+            border-radius: 6px;
+        }
+
+        .evaluation-level-option {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 8px;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+
+        .evaluation-level-option input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+            flex-shrink: 0;
+        }
+
+        #evaluations-container {
+            display: grid;
+            grid-template-columns: repeat(
+                2,
+                minmax(0, 1fr)
+            );
+            gap: 18px;
+        }
+
+        #evaluations-container .evaluation-block {
+            margin-bottom: 0;
+        }
+
+        /* =========================================================
+           NIVEAUX — ÉVOLUTION DU ROOKIE
+           ========================================================= */
+
+        #niveau-actuel,
+        #niveau-precedent {
+            margin-top: 8px;
+        }
+
+        @media (max-width: 800px) {
+
+            .rapport-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .rapport-full {
+                grid-column: auto;
+            }
+
+            .rapport-page {
+                padding: 25px 15px;
+            }
+
+            #evaluations-container {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<!-- =====================================================
+     MODAL
+====================================================== -->
+
+<div
+    id="custom-modal"
+    class="custom-modal hidden"
+>
+
+    <div class="custom-modal-overlay"></div>
+
+    <div class="custom-modal-box">
+
+        <div
+            id="custom-modal-icon"
+            class="custom-modal-icon"
+        >
+            ⚠️
+        </div>
+
+        <h3 id="custom-modal-title">
+            Formulaire incomplet
+        </h3>
+
+        <p id="custom-modal-message"></p>
+
+        <div
+            id="custom-modal-content"
+            class="custom-modal-content"
+        ></div>
+
+        <button
+            type="button"
+            id="custom-modal-close"
+            class="primary"
+        >
+            Fermer
+        </button>
+
+    </div>
+
+</div>
+
+
+<body id="filigrane">
+
+
+<!-- =====================================================
+     HEADER
+====================================================== -->
+
+<header>
+
+    <a
+        href="index.html"
+        class="admin-brand"
+    >
+
+        <strong>SASP Nord</strong>
+
+        <span>
+            Suivi des agents
+        </span>
+
+    </a>
+</header>
+
+
+<!-- =====================================================
+     CONTENU
+====================================================== -->
+
+<main class="rapport-page">
+
+
+    <div class="row">
+
+        <div>
+
+            <h1>
+                Fiche de suivi — Rookie SASP Nord
+            </h1>
+
+            <p>
+                Suivi et accompagnement des agents en formation.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         1. INFORMATIONS DE L'AGENT
+    ================================================== -->
+
+    <section class="rapport-section">
+
+        <h2>
+            1. Informations de l'agent
+        </h2>
+
+        <p class="rapport-section-subtitle">
+            Informations concernant l'agent suivi.
+        </p>
+
+
+        <div class="rapport-block">
+
+            <div class="rapport-grid">
+
+
+                <label>
+
+                    Agent
+
+                    <select
+                        id="agent"
+                        required
+                    >
+
+                        <option value="">
+                            Sélectionner un agent
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+                <label>
+
+                    Matricule
+
+                    <input
+                        id="agent-matricule"
+                        type="text"
+                        readonly
+                        placeholder="Matricule"
+                    >
+
+                </label>
+
+
+                <label>
+
+                    Grade
+
+                    <input
+                        id="agent-grade"
+                        type="text"
+                        readonly
+                        placeholder="Grade"
+                    >
+
+                </label>
+
+
+                <label>
+
+                    Date d'entrée au SASP
+
+                    <input
+                        id="date-entree"
+                        type="date"
+                    >
+
+                </label>
+
+
+                <label>
+
+                    Tuteur
+
+                    <select id="tuteur">
+
+                        <option value="">
+                            Sélectionner un tuteur
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+                <label>
+
+                    Nombre de patrouilles observées
+
+                    <input
+                        id="patrouilles"
+                        type="number"
+                        min="0"
+                        value="0"
+                    >
+
+                </label>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         2. ÉVALUATION GÉNÉRALE
+    ================================================== -->
+
+    <section class="rapport-section">
+
+        <h2>
+            2. Évaluation générale
+        </h2>
+
+        <p class="rapport-section-subtitle">
+            Évaluez chaque compétence de 1 à 5 et ajoutez vos observations.
+        </p>
+
+        <div id="evaluations-container"></div>
+
+    </section>
+
+
+    <!-- =================================================
+         3. POINTS FORTS
+    ================================================== -->
+
+    <section class="rapport-section">
+
+        <h2>
+            3. Points forts
+        </h2>
+
+        <p class="rapport-section-subtitle">
+            Ajoutez les points forts observés chez l'agent.
+        </p>
+
+        <div id="points-forts-container"></div>
+
+        <button
+            id="add-point-fort"
+            class="primary"
+            type="button"
+        >
+            + Ajouter un point fort
+        </button>
+
+    </section>
+
+
+    <!-- =================================================
+         4. AXES D'AMÉLIORATION
+    ================================================== -->
+
+    <section class="rapport-section">
+
+        <h2>
+            4. Axes d'amélioration
+        </h2>
+
+        <p class="rapport-section-subtitle">
+            Identifiez les points à améliorer pour la prochaine évaluation.
+        </p>
+
+        <div id="axes-amelioration-container"></div>
+
+        <button
+            id="add-axe-amelioration"
+            class="primary"
+            type="button"
+        >
+            + Ajouter un axe d'amélioration
+        </button>
+
+    </section>
+
+
+    <!-- =================================================
+         5. OBJECTIFS
+    ================================================== -->
+
+    <section class="rapport-section">
+
+        <h2>
+            5. Objectifs pour la prochaine évaluation
+        </h2>
+
+        <p class="rapport-section-subtitle">
+            Définissez les objectifs à atteindre lors de la prochaine évaluation.
+        </p>
+
+        <div id="points-objectifs"></div>
+
+        <button
+            id="add-objectif"
+            class="primary"
+            type="button"
+        >
+            + Ajouter un objectif
+        </button>
+
+    </section>
+
+
+    <!-- =================================================
+         6. OBSERVATIONS DU SUPERVISEUR
+    ================================================== -->
+
+    <section class="rapport-section">
+
+        <h2>
+            6. Observations du superviseur
+        </h2>
+
+        <p class="rapport-section-subtitle">
+            Rédigez le bilan général de l'évaluation.
+        </p>
+
+
+        <div class="rapport-block">
+
+            <label>
+
+                Bilan général
+
+                <textarea
+                    id="bilan"
+                    rows="8"
+                ></textarea>
+
+            </label>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         7. ÉVOLUTION DU ROOKIE
+    ================================================== -->
+
+    <section class="rapport-section">
+
+        <h2>
+            7. Évolution du rookie
+        </h2>
+
+        <p class="rapport-section-subtitle">
+            Évaluez le niveau actuel de progression de l'agent.
+        </p>
+
+
+        <div class="rapport-block">
+
+            <div class="rapport-grid">
+
+
+                <label>
+
+                    Niveau actuel
+
+                    <select id="niveau-actuel">
+
+                        <option value="1">
+                            🔴 Niveau 1 — Découverte
+                        </option>
+
+                        <option value="2">
+                            🟠 Niveau 2 — Formation
+                        </option>
+
+                        <option value="3">
+                            🟡 Niveau 3 — Progression
+                        </option>
+
+                        <option value="4">
+                            🟢 Niveau 4 — Autonomie
+                        </option>
+
+                        <option value="5">
+                            🔵 Niveau 5 — Validation
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+                <label>
+
+                    Évaluation précédente
+
+                    <select id="niveau-precedent">
+
+                        <option value="0">
+                            ⚪ Niveau 0 — Aucun niveau précédent
+                        </option>
+
+                        <option value="1">
+                            🔴 Niveau 1 — Découverte
+                        </option>
+
+                        <option value="2">
+                            🟠 Niveau 2 — Formation
+                        </option>
+
+                        <option value="3">
+                            🟡 Niveau 3 — Progression
+                        </option>
+
+                        <option value="4">
+                            🟢 Niveau 4 — Autonomie
+                        </option>
+
+                        <option value="5">
+                            🔵 Niveau 5 — Validation
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+                <label class="rapport-full">
+
+                    Justification de l'évolution
+
+                    <textarea
+                        id="justification"
+                        rows="8"
+                        placeholder="Expliquez pourquoi ce niveau a été attribué..."
+                    ></textarea>
+
+                </label>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         8. VALIDATION
+    ================================================== -->
+
+    <section class="rapport-section">
+
+        <h2>
+            8. Validation
+        </h2>
+
+        <p class="rapport-section-subtitle">
+            Informations concernant l'évaluateur et la validation de la fiche.
+        </p>
+
+
+        <div class="rapport-block">
+
+            <div class="rapport-grid">
+
+
+                <label>
+
+                    Évaluateur
+
+                    <select
+                        id="evaluateur"
+                        required
+                    >
+
+                        <option value="">
+                            Sélectionner un évaluateur
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+                <label>
+
+                    Grade
+
+                    <input
+                        id="evaluateur-grade"
+                        type="text"
+                        readonly
+                    >
+
+                </label>
+
+
+                <label>
+
+                    Matricule
+
+                    <input
+                        id="evaluateur-matricule"
+                        type="text"
+                        readonly
+                    >
+
+                </label>
+
+
+                <label>
+
+                    Date
+
+                    <input
+                        id="date-validation"
+                        type="date"
+                        required
+                    >
+
+                </label>
+
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =================================================
+         ACTIONS
+    ================================================== -->
+
+    <div class="rapport-actions">
+
+        <button
+            id="generate"
+            class="primary"
+            type="button"
+        >
+            Générer la fiche
+        </button>
+
+
+        <button
+            id="copy"
+            type="button"
+        >
+            Copier
+        </button>
+
+    </div>
+
+
+    <!-- =================================================
+         APERÇU
+    ================================================== -->
+
+    <section class="rapport-preview">
+
+        <h2>
+            Aperçu Discord
+        </h2>
+
+        <p class="rapport-section-subtitle">
+            La fiche générée apparaîtra ici.
+        </p>
+
+
+        <textarea
+            id="rookie-output"
+            readonly
+            placeholder="Cliquez sur « Générer la fiche »..."
+        ></textarea>
+
+    </section>
+
+
+</main>
+
+
+<!-- =====================================================
+     SCRIPTS
+====================================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="js/rookie.js"></script>
+
+
+</body>
+
+</html>

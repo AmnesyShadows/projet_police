@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width,initial-scale=1"
+    >
+
+    <title>SASP Nord — Administration — Agents</title>
+
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="../css/login.css">
+</head>
+
+
+<body id="filigrane">
+
+<header>
+
+    <a href="../index.html" class="admin-brand">
+
+        <strong>SASP Nord</strong>
+
+        <span>
+            Administration — Agents
+        </span>
+
+    </a>
+
+    <strong id="admin-logged" class="admin-title hidden">
+        🔒 Administrateur
+    </strong>
+
+    <div>
+
+        <button
+            id="logout"
+            class="danger hidden"
+            type="button"
+        >
+            Déconnexion
+        </button>
+
+    </div>
+
+</header>
+
+
+<!-- =====================================================
+     ADMINISTRATION
+===================================================== -->
+
+<section
+    id="admin"
+    class="hidden"
+>
+
+
+    <!-- =================================================
+         SIDEBAR
+    ================================================== -->
+
+    <aside>
+
+        <div class="section-header">
+
+            <div class="section-title">
+
+                <h2>
+                    Agents
+                </h2>
+
+            </div>
+
+
+            <button
+                id="new"
+                class="primary"
+                type="button"
+            >
+                + Nouvel agent
+            </button>
+
+        </div>
+
+        <input
+            id="search"
+            placeholder="Rechercher..."
+        >
+
+        <div id="agents-content">
+
+            <div id="list"></div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =================================================
+         CONTENU PRINCIPAL
+    ================================================== -->
+
+    <main>
+
+
+        <!-- TITRE -->
+
+        <div class="row">
+
+            <div>
+
+                <h2 id="title">
+                    Nouvel agent
+                </h2>
+
+
+                <p id="status"></p>
+
+            </div>
+
+
+            <div>
+
+                <button
+                    id="delete"
+                    class="danger hidden"
+                    type="button"
+                >
+                    Supprimer
+                </button>
+
+
+                <button
+                    id="save"
+                    class="primary"
+                    type="button"
+                >
+                    Enregistrer
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- FORMULAIRE -->
+
+        <form id="form">
+
+
+            <!-- PRÉNOM -->
+
+            <label>
+
+                Prénom
+
+                <input
+                    id="prenom"
+                    required
+                >
+
+            </label>
+
+            <!-- NOM -->
+
+            <label>
+
+                Nom
+
+                <input
+                    id="nom"
+                    required
+                >
+
+            </label>
+
+            <!-- MATRICULE -->
+
+            <label>
+
+                Matricule
+
+                <input
+                    id="matricule"
+                    required
+                >
+
+            </label>
+
+            <!-- GRADE -->
+
+            <label>
+
+                Grade
+
+                <select
+                    id="grade"
+                    required
+                >
+
+                    <option value="">
+                        Sélectionner un grade
+                    </option>
+
+                </select>
+
+            </label>
+
+
+            <!-- DATE D'ARRIVÉE -->
+
+            <label>
+
+                Date d'arrivée
+
+                <input
+                    id="date_arrivee"
+                    type="date"
+                    required
+                >
+
+            </label>
+
+
+            <!-- FTI -->
+
+            <label>
+
+                FTI
+
+                <select id="fti">
+
+                    <option value="">
+                        Aucun FTI
+                    </option>
+
+                </select>
+
+            </label>
+
+
+            <!-- ACTIF -->
+
+            <label class="check full">
+
+                <input
+                    id="actif"
+                    type="checkbox"
+                >
+
+                Actif
+
+            </label>
+
+
+        </form>
+
+    </main>
+
+</section>
+
+
+<!-- =====================================================
+     SCRIPTS
+===================================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/login.js"></script>
+<script src="js/agents.js"></script>
+
+</body>
+
+</html>

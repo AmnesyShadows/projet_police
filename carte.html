@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Rivage WL - Carte Interactive des 10-20</title>
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header>
+        <a
+            href="index.html"
+            class="admin-brand"
+        >
+            <strong>SASP Nord</strong>
+            <span>
+                Carte interactive des 10-20
+            </span>
+
+        </a>
+        <div class="search-container">
+            <input
+                type="text"
+                id="search"
+                placeholder="Rechercher un lieu..."
+            >
+        </div>
+    </header>
+
+    <main>
+        <!-- SIDEBAR -->
+        <aside id="sidebar">
+            <h2>Filtres</h2>
+            <div class="filters" id="filters"></div>
+            <hr>
+            <h2>Lieux</h2>
+            <div id="location-list"></div>
+        </aside>
+
+        <!-- CARTE -->
+        <section id="map-container">
+            <div id="map"></div>
+            <button id="sidebar-toggle">
+                ☰
+            </button>
+        </section>
+    </main>
+
+    <!-- SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- LEAFLET -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- NOTRE JS -->
+    <script src="js/script.js"></script>
+
+</body>
+</html>

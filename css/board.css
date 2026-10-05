@@ -1,0 +1,702 @@
+/* =========================================================
+   RESET / BASE
+========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+
+    font-family: Arial, sans-serif;
+
+    background: #111;
+    color: #fff;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+.individu-heure-droits::-webkit-calendar-picker-indicator,
+#heure::-webkit-calendar-picker-indicator,
+#date::-webkit-calendar-picker-indicator,
+#date-entree::-webkit-calendar-picker-indicator,
+#date-validation::-webkit-calendar-picker-indicator
+{
+    filter: invert(1);
+    cursor: pointer;
+}
+
+/* =========================================================
+   FILIGRANE
+========================================================= */
+
+#filigrane {
+    position: relative;
+}
+
+#filigrane::before {
+    content: "";
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 100vw;
+    height: 100vh;
+
+    transform: translate(-50%, -50%);
+
+    /* background-image: url("../images/logo.png"); */
+    background-image: url("../images/bcso.png");
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+
+    opacity: 0.06;
+    z-index: -1;
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   BOUTONS / LIENS
+========================================================= */
+
+button,
+a:not(.admin-brand),
+.upload {
+    border: 1px solid #444;
+    border-radius: 6px;
+
+    padding: 9px 12px;
+
+    background: #252525;
+    color: #fff;
+
+    text-decoration: none;
+
+    cursor: pointer;
+}
+
+button.primary {
+    background: #2d7dd2;
+    border-color: #2d7dd2;
+}
+
+button.danger {
+    background: #8d2424;
+}
+
+button:hover,
+a:hover,
+.upload:hover {
+    opacity: 0.9;
+}
+
+
+/* =========================================================
+   ELEMENTS CACHÉS
+========================================================= */
+
+.hidden {
+    display: none !important;
+}
+
+.error {
+    color: #ff6b6b;
+    min-height: 20px;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+header {
+    min-height: 70px;
+    padding: 15px 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: #181818;
+    border-bottom: 1px solid #333;
+
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+header > div {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+header strong {
+    font-size: 22px;
+}
+
+header span {
+    color: #888;
+    font-size: 13px;
+}
+
+header a {
+    color: #ccc;
+    text-decoration: none;
+
+    padding: 9px 12px;
+    border-radius: 6px;
+}
+
+header a:hover {
+    background: #252525;
+    color: #fff;
+}
+
+.admin-brand {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    color: inherit;
+    text-decoration: none;
+
+    cursor: pointer;
+}
+
+/* =========================================================
+   LAYOUT GENERAL
+========================================================= */
+
+.row {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 10px;
+}
+
+
+/* =========================================================
+   PAGE DE CONNEXION
+========================================================= */
+
+/* #login {
+    min-height: calc(100vh - 65px);
+
+    display: grid;
+    place-items: center;
+} */
+
+.card {
+    width: min(420px, 90%);
+
+    background: #181818;
+
+    border: 1px solid #333;
+    border-radius: 10px;
+
+    padding: 25px;
+}
+
+.card form {
+    display: grid;
+
+    gap: 14px;
+
+    margin-top: 20px;
+}
+
+
+/* =========================================================
+   LABELS / INPUTS
+========================================================= */
+
+label {
+    display: grid;
+
+    gap: 6px;
+
+    color: #ddd;
+
+    font-size: 13px;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+
+    background: #222;
+    color: #fff;
+
+    border: 1px solid #3a3a3a;
+    border-radius: 6px;
+
+    padding: 10px;
+
+    outline: 0;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #2d7dd2;
+}
+
+
+/* =========================================================
+   ADMIN — LAYOUT PRINCIPAL
+========================================================= */
+
+#admin {
+    height: calc(100vh - 65px);
+
+    display: grid;
+
+    grid-template-columns: 300px 1fr;
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+aside {
+    background: #181818;
+
+    border-right: 1px solid #333;
+
+    padding: 18px;
+
+    overflow: auto;
+}
+
+aside h2 {
+    margin: 0 0 15px;
+}
+
+#search {
+    margin-bottom: 12px;
+}
+
+/* =========================================================
+   SECTIONS SIDEBAR
+========================================================= */
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.section-title h2 {
+    margin: 0;
+}
+
+.collapse-button {
+    border: 0;
+    background: transparent;
+    padding: 2px 5px;
+    color: #999;
+    font-size: 18px;
+    line-height: 1;
+}
+
+.collapse-button:hover {
+    background: #252525;
+    opacity: 1;
+}
+
+
+/* =========================================================
+   LISTE DES LIEUX
+========================================================= */
+
+.item {
+    padding: 10px;
+
+    background: #222;
+
+    border: 1px solid transparent;
+    border-radius: 6px;
+
+    margin-bottom: 7px;
+
+    cursor: pointer;
+}
+
+.item.active,
+.item:hover {
+    border-color: #444;
+
+    background: #2b2b2b;
+}
+
+.item small {
+    display: block;
+
+    color: #888;
+
+    margin-top: 4px;
+}
+
+.item.disabled-item {
+    opacity: 0.45;
+}
+
+.item.disabled-item b,
+.item.disabled-item small {
+    text-decoration: line-through;
+}
+
+.item.disabled-item:hover {
+    opacity: 0.65;
+}
+
+
+/* =========================================================
+   CONTENU PRINCIPAL
+========================================================= */
+
+main {
+    padding: 22px;
+
+    overflow: auto;
+}
+
+main > .row {
+    margin-bottom: 20px;
+}
+
+
+/* =========================================================
+   FORMULAIRE
+========================================================= */
+
+#form {
+    background: #181818;
+
+    border: 1px solid #333;
+    border-radius: 10px;
+
+    padding: 20px;
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 16px;
+}
+
+.full {
+    grid-column: 1 / -1;
+}
+
+
+/* =========================================================
+   CHECKBOX
+========================================================= */
+
+.check {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+.check input {
+    width: auto;
+}
+
+
+/* =========================================================
+   CARTE
+========================================================= */
+
+#map {
+    height: 420px;
+
+    margin-top: 8px;
+
+    border-radius: 7px;
+
+    overflow: hidden;
+
+    background: #222;
+}
+
+
+/* =========================================================
+   UPLOAD IMAGES
+========================================================= */
+
+.upload {
+    display: inline-block;
+}
+
+.upload input {
+    display: none;
+}
+
+
+/* =========================================================
+   LISTE DES IMAGES
+========================================================= */
+
+#images {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(180px, 1fr)
+        );
+
+    gap: 10px;
+
+    margin-top: 10px;
+}
+
+.image {
+    background: #222;
+
+    border: 1px solid #333;
+    border-radius: 7px;
+
+    overflow: hidden;
+}
+
+.image img {
+    width: 100%;
+
+    height: 130px;
+
+    object-fit: cover;
+
+    display: block;
+}
+
+.image div {
+    padding: 8px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 5px;
+}
+
+.image button {
+    padding: 5px 8px;
+
+    font-size: 11px;
+}
+
+/* =========================================================
+   VICTIMES / OTAGES
+========================================================= */
+
+.victime-type {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.victime-type-title {
+    color: #ddd;
+    font-size: 13px;
+}
+
+.victime-type-options {
+    display: flex;
+    gap: 10px;
+}
+
+.victime-type-options label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+
+    width: auto;
+
+    padding: 9px 12px;
+
+    background: #1b1b1b;
+    border: 1px solid #303030;
+    border-radius: 6px;
+
+    cursor: pointer;
+}
+
+.victime-type-options label:hover {
+    border-color: #555;
+}
+
+.victime-type-options input {
+    width: auto;
+}
+
+
+/* =========================================================
+   RESPONSIVE / MOBILE
+========================================================= */
+
+@media (max-width: 850px) {
+
+    #admin {
+        grid-template-columns: 1fr;
+
+        height: auto;
+    }
+
+    aside {
+        max-height: 280px;
+
+        border-right: 0;
+
+        border-bottom: 1px solid #333;
+    }
+
+    #form {
+        grid-template-columns: 1fr;
+    }
+
+    .full {
+        grid-column: auto;
+    }
+
+    #map {
+        height: 350px;
+    }
+}
+
+/* =========================================================
+   POPUP / MODAL
+========================================================= */
+
+.custom-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+}
+
+.custom-modal.hidden {
+    display: none;
+}
+
+.custom-modal-overlay {
+    position: absolute;
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+}
+
+.custom-modal-box {
+    position: relative;
+    z-index: 1;
+
+    width: 100%;
+    max-width: 450px;
+
+    padding: 30px;
+
+    background: #1b1b1b;
+    border: 1px solid #3a3a3a;
+    border-radius: 12px;
+
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.6);
+
+    text-align: center;
+
+    animation: modalAppear 0.18s ease-out;
+}
+
+.custom-modal-icon {
+    width: 55px;
+    height: 55px;
+
+    margin: 0 auto 15px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #302817;
+
+    font-size: 25px;
+}
+
+.custom-modal-box h3 {
+    margin: 0 0 10px;
+
+    color: #fff;
+    font-size: 21px;
+}
+
+.custom-modal-box p {
+    margin: 0 0 18px;
+
+    color: #aaa;
+    line-height: 1.5;
+}
+
+.custom-modal-content {
+    margin-bottom: 20px;
+
+    color: #ddd;
+    text-align: left;
+}
+
+.custom-modal-content ul {
+    margin: 10px 0 0;
+    padding-left: 20px;
+}
+
+.custom-modal-content li {
+    margin-bottom: 6px;
+}
+
+.custom-modal-box button {
+    width: 100%;
+}
+
+@keyframes modalAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

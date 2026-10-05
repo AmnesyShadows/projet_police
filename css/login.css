@@ -1,0 +1,47 @@
+/* ============================================================
+   LOGIN
+   ============================================================ */
+
+#login-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 30px;
+
+    background: rgba(0, 0, 0, 0.75);
+}
+
+#login-panel.hidden {
+    display: none !important;
+}
+
+#login-panel .card {
+    width: 100%;
+    max-width: 420px;
+
+    padding: 30px;
+
+    background: #181818;
+    border: 1px solid #333;
+    border-radius: 10px;
+}
+
+#login-panel .card h2 {
+    margin-top: 0;
+}
+
+#login-panel .card p {
+    color: #888;
+    line-height: 1.5;
+}
+
+#login-panel .card form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
