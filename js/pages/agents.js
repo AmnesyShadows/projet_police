@@ -70,6 +70,14 @@ async function loadAgents() {
         return;
     }
 
+    const pageSubtitle =
+        document.querySelector(".page-subtitle");
+
+    if (pageSubtitle) {
+        pageSubtitle.textContent =
+            `${data.length} ${data.length > 1 ? "agents enregistrés" : "agent enregistré"}`;
+    }
+
     const table =
         createTable({
             config: agentsConfig,
@@ -330,7 +338,6 @@ function renderAgentFiche(agent) {
     ficheContainer.style.display = "";
     ficheContainer.innerHTML = "";
 
-    // Bouton retour
     const backButton =
         document.createElement(
             "button"
@@ -354,7 +361,6 @@ function renderAgentFiche(agent) {
         backButton
     );
 
-    // Titre
     ficheContainer.appendChild(
         createPageTitle(
             `${agent.prenom} ${agent.nom}`,
@@ -367,7 +373,6 @@ function renderAgentFiche(agent) {
         )
     );
 
-    // Grille des cards
     const grid =
         document.createElement(
             "div"
@@ -376,7 +381,6 @@ function renderAgentFiche(agent) {
     grid.className =
         "card-grid-detail";
 
-    // Configuration des cards
     const cards =
         agentsConfig.cards ?? [];
 
@@ -405,7 +409,6 @@ function createAgentCard(
     cardConfig,
     agent
 ) {
-    // Cards spécialisées
     if (cardConfig.modal) {
         return createSpecializedAgentCard(
             cardConfig,
@@ -413,7 +416,6 @@ function createAgentCard(
         );
     }
 
-    // Contenu
     const content =
         document.createElement("div");
 
@@ -469,7 +471,6 @@ function createAgentCard(
         content.appendChild(row);
     });
 
-    // Action Modifier dans le header
     const editableFields =
         fields.filter(
             field =>
@@ -510,7 +511,6 @@ function createAgentCard(
             editButton;
     }
 
-    // Création de la card avec le composant générique
     return createCard({
         title:
             cardConfig.title ?? "",
@@ -535,17 +535,13 @@ function createSpecializedAgentCard(
     agent
 ) {
     const content =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
     content.className =
         "specialized-card";
 
     const message =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
     message.className =
         "specialized-card-placeholder";
@@ -556,29 +552,19 @@ function createSpecializedAgentCard(
     content.appendChild(message);
 
     const footer =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
     footer.className =
         "card-actions";
 
     const addButton =
-        document.createElement(
-            "button"
-        );
+        document.createElement("button");
 
     addButton.type = "button";
-
     addButton.className =
         "btn-table-new";
-
     addButton.textContent =
         "+ Ajouter";
-
-    // ========================================================
-    // ACTION AJOUTER
-    // ========================================================
 
     addButton.addEventListener(
         "click",
@@ -598,9 +584,29 @@ function createSpecializedAgentCard(
                 return;
             }
 
-            console.warn(
-                `Aucune action d'ajout configurée pour la card "${cardConfig.key}".`
-            );
+            if (
+                cardConfig.key ===
+                "divisions"
+            ) {
+                openAddDivisionModal(
+                    agent,
+                    content
+                );
+
+                return;
+            }
+
+            if (
+                cardConfig.key ===
+                "formations"
+            ) {
+                openAddFormationModal(
+                    agent,
+                    content
+                );
+
+                return;
+            }
         }
     );
 
@@ -627,6 +633,26 @@ function createSpecializedAgentCard(
         "armements"
     ) {
         loadAgentArmements(
+            agent.id,
+            content
+        );
+    }
+
+    if (
+        cardConfig.key ===
+        "divisions"
+    ) {
+        loadAgentDivisions(
+            agent.id,
+            content
+        );
+    }
+
+    if (
+        cardConfig.key ===
+        "formations"
+    ) {
+        loadAgentFormations(
             agent.id,
             content
         );
@@ -685,8 +711,6 @@ function openAddArmementModal(
         return;
     }
 
-    // createModal attend une configuration
-    // sous la forme config.create.fields.
     const modalConfig = {
         ...armementsConfig,
 
@@ -747,6 +771,783 @@ function openAddArmementModal(
             );
         }
     });
+}
+
+// ============================================================
+// AJOUT DIVISION
+// ============================================================
+
+function openAddDivisionModal(
+    agent,
+    container
+) {
+    const modalConfig = {
+        create: {
+            fields: [
+                {
+                    name: "division_id",
+                    label: "Division",
+                    type: "select",
+                    required: true,
+                    width: 4,
+                    source: {
+                        table: "divisions",
+                        value: "id",
+                        label: "nom",
+                        orderBy: "nom",
+                        ascending: true
+                    }
+                },
+                {
+                    name: "role",
+                    label: "Rôle",
+                    type: "select",
+                    required: true,
+                    width: 4,
+                    options: [
+                        {
+                            value: "none",
+                            label: "Aucun rôle"
+                        },
+                        {
+                            value: "lead",
+                            label: "Lead"
+                        },
+                        {
+                            value: "co_lead",
+                            label: "Co-lead"
+                        }
+                    ]
+                }
+            ]
+        }
+    };
+
+    createModal({
+        config: modalConfig,
+        data: {},
+        mode: "create",
+        title: "Ajouter une division",
+
+        onSave: async values => {
+            const lead =
+                values.role === "lead";
+
+            const coLead =
+                values.role === "co_lead";
+
+            const payload = {
+                agent_id: agent.id,
+                division_id:
+                    values.division_id,
+                lead,
+                co_lead: coLead
+            };
+
+            const { error } =
+                await supabaseClient
+                    .from("agent_divisions")
+                    .insert(payload);
+
+            if (error) {
+                console.error(
+                    "Erreur ajout division :",
+                    error
+                );
+
+                createAlert(
+                    "Impossible d'ajouter cette division.",
+                    "danger",
+                    {
+                        title: "Erreur"
+                    }
+                );
+
+                return;
+            }
+
+            createAlert(
+                "La division a été ajoutée avec succès.",
+                "success",
+                {
+                    title: "Ajout réussi"
+                }
+            );
+
+            await loadAgentDivisions(
+                agent.id,
+                container
+            );
+        }
+    });
+}
+
+// ============================================================
+// AJOUT FORMATION
+// ============================================================
+
+function openAddFormationModal(
+    agent,
+    container
+) {
+    const modalConfig = {
+        create: {
+            fields: [
+                {
+                    name: "formation_id",
+                    label: "Formation",
+                    type: "select",
+                    required: true,
+                    width: 4,
+                    source: {
+                        table: "formations",
+                        value: "id",
+                        label: "nom",
+                        orderBy: "nom",
+                        ascending: true
+                    }
+                }
+            ]
+        }
+    };
+
+    createModal({
+        config: modalConfig,
+        data: {},
+        mode: "create",
+        title: "Ajouter une formation",
+
+        onSave: async values => {
+            const { error } =
+                await supabaseClient
+                    .from("agent_formations")
+                    .insert({
+                        agent_id: agent.id,
+                        formation_id:
+                            values.formation_id
+                    });
+
+            if (error) {
+                console.error(
+                    "Erreur ajout formation :",
+                    error
+                );
+
+                createAlert(
+                    "Impossible d'ajouter cette formation.",
+                    "danger",
+                    {
+                        title: "Erreur"
+                    }
+                );
+
+                return;
+            }
+
+            createAlert(
+                "La formation a été ajoutée avec succès.",
+                "success",
+                {
+                    title: "Ajout réussi"
+                }
+            );
+
+            await loadAgentFormations(
+                agent.id,
+                container
+            );
+        }
+    });
+}
+
+// ============================================================
+// FORMATIONS AGENT
+// ============================================================
+
+async function loadAgentFormations(
+    agentId,
+    container
+) {
+    const {
+        data: associations,
+        error: associationsError
+    } =
+        await supabaseClient
+            .from("agent_formations")
+            .select(`
+                agent_id,
+                formation_id
+            `)
+            .eq(
+                "agent_id",
+                agentId
+            );
+
+    if (associationsError) {
+        console.error(
+            "Erreur récupération associations formations :",
+            associationsError
+        );
+
+        container.innerHTML = "";
+
+        const message =
+            document.createElement(
+                "div"
+            );
+
+        message.className =
+            "specialized-card-placeholder";
+
+        message.textContent =
+            "Impossible de récupérer les formations.";
+
+        container.appendChild(
+            message
+        );
+
+        return;
+    }
+
+    container.innerHTML = "";
+
+    if (
+        !associations ||
+        associations.length === 0
+    ) {
+        const message =
+            document.createElement(
+                "div"
+            );
+
+        message.className =
+            "specialized-card-placeholder";
+
+        message.textContent =
+            "Aucune formation attribuée.";
+
+        container.appendChild(
+            message
+        );
+
+        return;
+    }
+
+    const formationIds = [
+        ...new Set(
+            associations
+                .map(
+                    association =>
+                        association.formation_id
+                )
+                .filter(Boolean)
+        )
+    ];
+
+    if (
+        formationIds.length === 0
+    ) {
+        const message =
+            document.createElement(
+                "div"
+            );
+
+        message.className =
+            "specialized-card-placeholder";
+
+        message.textContent =
+            "Aucune formation attribuée.";
+
+        container.appendChild(
+            message
+        );
+
+        return;
+    }
+
+    const {
+        data: formations,
+        error: formationsError
+    } =
+        await supabaseClient
+            .from("formations")
+            .select(`
+                id,
+                nom,
+                icon
+            `)
+            .in(
+                "id",
+                formationIds
+            )
+            .order(
+                "nom",
+                {
+                    ascending: true
+                }
+            );
+
+    if (formationsError) {
+        console.error(
+            "Erreur récupération formations :",
+            formationsError
+        );
+
+        container.innerHTML = "";
+
+        const message =
+            document.createElement(
+                "div"
+            );
+
+        message.className =
+            "specialized-card-placeholder";
+
+        message.textContent =
+            "Impossible de récupérer les formations.";
+
+        container.appendChild(
+            message
+        );
+
+        return;
+    }
+
+    const formationsById =
+        new Map(
+            (formations ?? []).map(
+                formation => [
+                    formation.id,
+                    formation
+                ]
+            )
+        );
+
+    associations.forEach(
+        association => {
+            const formation =
+                formationsById.get(
+                    association.formation_id
+                );
+
+            if (!formation) {
+                return;
+            }
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "specialized-card-item";
+
+            const badge =
+                createBadge(
+                    `${formation.icon ?? ""}${formation.icon ? " " : ""}${formation.nom}`,
+                    "default"
+                );
+            
+            badge.classList.add(
+                "agent-division-large-badge"
+            );
+
+            const deleteButton =
+                document.createElement(
+                    "button"
+                );
+
+            deleteButton.type =
+                "button";
+
+            deleteButton.className =
+                "specialized-card-item-delete";
+
+            deleteButton.textContent =
+                "×";
+
+            deleteButton.title =
+                "Retirer cette formation";
+
+            deleteButton.addEventListener(
+                "click",
+                async event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const confirmed =
+                        window.confirm(
+                            `Retirer la formation "${formation.nom}" de cet agent ?`
+                        );
+
+                    if (!confirmed) {
+                        return;
+                    }
+
+                    const { error } =
+                        await supabaseClient
+                            .from(
+                                "agent_formations"
+                            )
+                            .delete()
+                            .eq(
+                                "agent_id",
+                                agentId
+                            )
+                            .eq(
+                                "formation_id",
+                                association.formation_id
+                            );
+
+                    if (error) {
+                        console.error(
+                            "Erreur suppression formation agent :",
+                            error
+                        );
+
+                        createAlert(
+                            "Impossible de retirer cette formation.",
+                            "danger",
+                            {
+                                title: "Erreur"
+                            }
+                        );
+
+                        return;
+                    }
+
+                    createAlert(
+                        "La formation a été retirée de l'agent.",
+                        "success",
+                        {
+                            title:
+                                "Suppression réussie"
+                        }
+                    );
+
+                    await loadAgentFormations(
+                        agentId,
+                        container
+                    );
+                }
+            );
+
+            item.appendChild(
+                badge
+            );
+
+            item.appendChild(
+                deleteButton
+            );
+
+            container.appendChild(
+                item
+            );
+        }
+    );
+}
+
+// ============================================================
+// DIVISIONS AGENT
+// ============================================================
+
+async function loadAgentDivisions(
+    agentId,
+    container
+) {
+    const {
+        data: associations,
+        error: associationsError
+    } =
+        await supabaseClient
+            .from("agent_divisions")
+            .select(`
+                agent_id,
+                division_id,
+                lead,
+                co_lead
+            `)
+            .eq(
+                "agent_id",
+                agentId
+            );
+
+    if (associationsError) {
+        console.error(
+            "Erreur récupération associations divisions :",
+            associationsError
+        );
+
+        container.innerHTML = "";
+
+        const message =
+            document.createElement(
+                "div"
+            );
+
+        message.className =
+            "specialized-card-placeholder";
+
+        message.textContent =
+            "Impossible de récupérer les divisions.";
+
+        container.appendChild(
+            message
+        );
+
+        return;
+    }
+
+    container.innerHTML = "";
+
+    if (
+        !associations ||
+        associations.length === 0
+    ) {
+        const message =
+            document.createElement(
+                "div"
+            );
+
+        message.className =
+            "specialized-card-placeholder";
+
+        message.textContent =
+            "Aucune division attribuée.";
+
+        container.appendChild(
+            message
+        );
+
+        return;
+    }
+
+    const divisionIds = [
+        ...new Set(
+            associations
+                .map(
+                    association =>
+                        association.division_id
+                )
+                .filter(Boolean)
+        )
+    ];
+
+    if (
+        divisionIds.length === 0
+    ) {
+        const message =
+            document.createElement(
+                "div"
+            );
+
+        message.className =
+            "specialized-card-placeholder";
+
+        message.textContent =
+            "Aucune division attribuée.";
+
+        container.appendChild(
+            message
+        );
+
+        return;
+    }
+
+    const {
+        data: divisions,
+        error: divisionsError
+    } =
+        await supabaseClient
+            .from("divisions")
+            .select(`
+                id,
+                nom,
+                nom_complet,
+                couleur
+            `)
+            .in(
+                "id",
+                divisionIds
+            );
+
+    if (divisionsError) {
+        console.error(
+            "Erreur récupération divisions :",
+            divisionsError
+        );
+
+        container.innerHTML = "";
+
+        const message =
+            document.createElement(
+                "div"
+            );
+
+        message.className =
+            "specialized-card-placeholder";
+
+        message.textContent =
+            "Impossible de récupérer les divisions.";
+
+        container.appendChild(
+            message
+        );
+
+        return;
+    }
+
+    const divisionsById =
+        new Map(
+            (divisions ?? []).map(
+                division => [
+                    division.id,
+                    division
+                ]
+            )
+        );
+
+    associations.forEach(
+        association => {
+            const division =
+                divisionsById.get(
+                    association.division_id
+                );
+
+            if (!division) {
+                return;
+            }
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "specialized-card-item";
+
+            let label =
+                division.nom ?? "—";
+
+            if (
+                association.lead
+            ) {
+                label =
+                    `LEAD ${label}`;
+            } else if (
+                association.co_lead
+            ) {
+                label =
+                    `CO-LEAD ${label}`;
+            }
+
+            const badge =
+                createBadge(
+                    label,
+                    division.couleur ||
+                        "default"
+                );
+
+            badge.classList.add(
+                "agent-division-large-badge"
+            );
+
+            const deleteButton =
+                document.createElement(
+                    "button"
+                );
+
+            deleteButton.type =
+                "button";
+
+            deleteButton.className =
+                "specialized-card-item-delete";
+
+            deleteButton.textContent =
+                "×";
+
+            deleteButton.title =
+                "Retirer cette division";
+
+            deleteButton.addEventListener(
+                "click",
+                async event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const confirmed =
+                        window.confirm(
+                            `Retirer la division "${division.nom_complet ?? division.nom}" de cet agent ?`
+                        );
+
+                    if (!confirmed) {
+                        return;
+                    }
+
+                    const {
+                        error
+                    } =
+                        await supabaseClient
+                            .from(
+                                "agent_divisions"
+                            )
+                            .delete()
+                            .eq(
+                                "agent_id",
+                                agentId
+                            )
+                            .eq(
+                                "division_id",
+                                association.division_id
+                            );
+
+                    if (error) {
+                        console.error(
+                            "Erreur suppression division agent :",
+                            error
+                        );
+
+                        createAlert(
+                            "Impossible de retirer cette division.",
+                            "danger",
+                            {
+                                title:
+                                    "Erreur"
+                            }
+                        );
+
+                        return;
+                    }
+
+                    createAlert(
+                        "La division a été retirée de l'agent.",
+                        "success",
+                        {
+                            title:
+                                "Suppression réussie"
+                        }
+                    );
+
+                    await loadAgentDivisions(
+                        agentId,
+                        container
+                    );
+                }
+            );
+
+            item.appendChild(
+                badge
+            );
+
+            item.appendChild(
+                deleteButton
+            );
+
+            container.appendChild(
+                item
+            );
+        }
+    );
 }
 
 // ============================================================
@@ -827,10 +1628,6 @@ async function loadAgentArmements(
         return;
     }
 
-    // ========================================================
-    // REGROUPEMENT PAR NIVEAU DE PPA
-    // ========================================================
-
     const groups = {
         0: [],
         1: [],
@@ -853,10 +1650,6 @@ async function loadAgentArmements(
         }
     });
 
-    // ========================================================
-    // AFFICHAGE DES GROUPES
-    // ========================================================
-
     const groupLabels = {
         0: "Sans PPA",
         1: "PPA 1",
@@ -875,7 +1668,6 @@ async function loadAgentArmements(
                 return;
             }
 
-            // Titre du groupe
             const groupTitle =
                 document.createElement(
                     "div"
@@ -891,7 +1683,6 @@ async function loadAgentArmements(
                 groupTitle
             );
 
-            // Armements du groupe
             armements.forEach(
                 armement => {
                     const item =
@@ -902,7 +1693,6 @@ async function loadAgentArmements(
                     item.className =
                         "specialized-card-item";
 
-                    // Nom de l'arme
                     const weaponName =
                         document.createElement(
                             "div"
@@ -915,7 +1705,6 @@ async function loadAgentArmements(
                         armement.armes?.nom ??
                         "Arme inconnue";
 
-                    // Numéro de série
                     const serial =
                         document.createElement(
                             "div"
@@ -929,7 +1718,6 @@ async function loadAgentArmements(
                             ? `S/N : ${armement.numero_serie}`
                             : "S/N : —";
 
-                    // Bouton supprimer
                     const deleteButton =
                         document.createElement(
                             "button"
@@ -1052,7 +1840,6 @@ function renderAgentField(
         return "—";
     }
 
-    // Grade
     if (
         field.name === "grade"
     ) {
@@ -1062,7 +1849,6 @@ function renderAgentField(
         );
     }
 
-    // Boolean
     if (
         field.type === "checkbox"
     ) {
@@ -1077,7 +1863,6 @@ function renderAgentField(
             ).outerHTML;
     }
 
-    // Statut
     if (
         field.name === "statut"
     ) {
@@ -1105,7 +1890,6 @@ function renderAgentField(
         ).outerHTML;
     }
 
-    // Blâme
     if (
         field.name === "blame"
     ) {
@@ -1155,8 +1939,6 @@ function openAgentCardEditModal(
         return;
     }
 
-    // On réutilise la configuration globale de modification.
-    // On ne modifie PAS agentsConfig.
     const modalConfig = {
         ...agentsConfig,
 
