@@ -42,6 +42,14 @@ async function loadGrades() {
         return;
     }
 
+    const pageSubtitle =
+        document.querySelector(".page-subtitle");
+
+    if (pageSubtitle) {
+        pageSubtitle.textContent =
+            `${data.length} ${data.length > 1 ? "grades enregistrés" : "grade enregistré"}`;
+    }
+
     const table =
         createTable({
             config: gradesConfig,

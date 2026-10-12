@@ -14,6 +14,11 @@ const menuConfig = [
                 index: true
             },
             {
+                title: "Pointeuse",
+                icon: "🕑",
+                page: "../pages/pointeuse.html"
+            },
+            {
                 title: "Carte",
                 icon: "🗺️",
                 page: "../pages/carte.html"
@@ -57,6 +62,22 @@ const menuConfig = [
                 title: "Grades",
                 icon: "⭐",
                 page: "../pages/grades.html"
+            }
+            ,
+            {
+                title: "Divisions",
+                icon: "🎖️",
+                page: "../pages/divisions.html"
+            },
+            {
+                title: "Formations",
+                icon: "🎓",
+                page: "../pages/formations.html"
+            },
+            {
+                title: "Taux horaires",
+                icon: "💵",
+                page: "../pages/taux-horaires.html"
             }
         ]
     }

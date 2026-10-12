@@ -42,6 +42,14 @@ async function loadArmes() {
         return;
     }
 
+    const pageSubtitle =
+        document.querySelector(".page-subtitle");
+
+    if (pageSubtitle) {
+        pageSubtitle.textContent =
+            `${data.length} ${data.length > 1 ? "armes enregistrées" : "arme enregistrée"}`;
+    }
+
     const table =
         createTable({
             config: armesConfig,

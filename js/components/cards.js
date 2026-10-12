@@ -9,9 +9,11 @@ function createCard(options = {}) {
         content = "",
         footer = "",
         headerActions = "",
+        headerBadge = null,
         icon = "",
         className = "",
-        width = 1
+        width = 1,
+        highcharts = null
     } = options;
 
     const card =
@@ -42,6 +44,7 @@ function createCard(options = {}) {
 
     const hasHeader =
         icon ||
+        headerBadge ||
         title ||
         subtitle;
 
@@ -75,6 +78,47 @@ function createCard(options = {}) {
             headerLeft.appendChild(
                 iconElement
             );
+        }
+
+        /*
+         * BADGE
+         */
+
+        if (
+            headerBadge !== null &&
+            headerBadge !== undefined &&
+            headerBadge !== ""
+        ) {
+            if (
+                headerBadge instanceof HTMLElement
+            ) {
+                const badgeWrapper =
+                    document.createElement("div");
+
+                badgeWrapper.className =
+                    "card-header-badge";
+
+                badgeWrapper.appendChild(
+                    headerBadge
+                );
+
+                headerLeft.appendChild(
+                    badgeWrapper
+                );
+            } else {
+                const badgeWrapper =
+                    document.createElement("div");
+
+                badgeWrapper.className =
+                    "card-header-badge";
+
+                badgeWrapper.innerHTML =
+                    String(headerBadge);
+
+                headerLeft.appendChild(
+                    badgeWrapper
+                );
+            }
         }
 
         /*
@@ -177,14 +221,10 @@ function createCard(options = {}) {
             "card-content";
 
         /*
-         * On accepte maintenant :
+         * On accepte :
          *
          * - une chaîne HTML
          * - un HTMLElement
-         *
-         * Cela permettra à la fiche agent
-         * de construire son contenu proprement
-         * en JavaScript.
          */
 
         if (
@@ -201,6 +241,76 @@ function createCard(options = {}) {
         card.appendChild(
             contentElement
         );
+    }
+
+    /*
+     * HIGHCHARTS
+     *
+     * Exemple :
+     *
+     * highcharts: {
+     *     render: renderAgentPrimeChart
+     * }
+     *
+     * Le renderer est volontairement fourni
+     * par la page qui utilise la card.
+     *
+     * cards.js ne contient aucune logique métier.
+     */
+
+    if (
+        highcharts
+    ) {
+        const chartContainer =
+            document.createElement("div");
+
+        chartContainer.className =
+            "highcharts-container";
+
+        card.appendChild(
+            chartContainer
+        );
+
+        try {
+            const renderer =
+                typeof highcharts.render === "function"
+                    ? highcharts.render
+                    : typeof highcharts.render === "string"
+                        ? window[highcharts.render]
+                        : null;
+
+            if (
+                typeof renderer !== "function"
+            ) {
+                console.error(
+                    "Renderer Highcharts introuvable :",
+                    highcharts.render
+                );
+
+                return card;
+            }
+
+            const result =
+                renderer({
+                    card,
+                    container: chartContainer,
+                    options,
+                    ...highcharts
+                });
+
+            if (
+                result instanceof HTMLElement
+            ) {
+                chartContainer.appendChild(
+                    result
+                );
+            }
+        } catch (error) {
+            console.error(
+                "Erreur lors du rendu Highcharts :",
+                error
+            );
+        }
     }
 
     /*
@@ -234,8 +344,13 @@ function createCard(options = {}) {
         );
     }
 
+    /*
+     * RETOUR
+     */
+
     return card;
 }
+
 
 // ============================================================
 // SECURITE

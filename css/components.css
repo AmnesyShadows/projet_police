@@ -403,6 +403,22 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     font-weight: 600;
     font-size: 20px;
 }
+.card-header-badge {
+    min-width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.card-header-badge .badge {
+    font-size: 16px;
+    min-width: 42px;
+    min-height: 42px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
 /* ============================================================
    CARD GRID
    ============================================================ */
@@ -1030,7 +1046,7 @@ body.modal-open {
     justify-content: center;
     padding: 4px 8px;
     border-radius: 6px;
-    font-size: 10px;
+    font-size: 13px;
     font-weight: 600;
     line-height: 1;
     white-space: nowrap;
@@ -1054,6 +1070,14 @@ body.modal-open {
 .badge-accent {
     background: rgba(212, 167, 44, .12);
     color: var(--accent-hover);
+}
+.badge-info {
+    background: rgba(15, 64, 197, 0.12);
+    color: var(--info);
+}
+.agent-division-large-badge {
+    font-size: 16px;
+    align-self: flex-start;
 }
 /* ============================================================
    ALERT
@@ -1165,4 +1189,182 @@ body.modal-open {
 .btn-table-new:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
+}
+/* ============================================================
+   POINTEUSE
+   ============================================================ */
+.modal:has(.pointeuse-wrapper) {
+    width: min(1100px, calc(100vw - 40px));
+    max-width: 1100px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+.pointeuse-wrapper {
+    width: 100%;
+    min-width: 0;
+}
+.pointeuse-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+.pointeuse-header-info h4 {
+    margin: 0 0 5px;
+    font-size: 16px;
+    font-weight: 700;
+}
+.pointeuse-header-info p {
+    margin: 0;
+    font-size: 12px;
+    opacity: 0.65;
+}
+.pointeuse-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 12px;
+    border-radius: 8px;
+    background: rgba(120, 130, 150, 0.12);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.pointeuse-table-container {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--border-color, rgba(128, 128, 128, 0.2));
+    border-radius: 12px;
+}
+.pointeuse-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    font-size: 13px;
+}
+.pointeuse-table thead {
+    background: rgba(120, 130, 150, 0.08);
+}
+.pointeuse-table th {
+    padding: 13px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    white-space: nowrap;
+}
+.pointeuse-table td {
+    padding: 12px 16px;
+    vertical-align: middle;
+    border-top: 1px solid var(--border-color, rgba(128, 128, 128, 0.12));
+}
+.pointeuse-table tbody tr {
+    transition: background 0.15s ease;
+}
+.pointeuse-table tbody tr:hover {
+    background: rgba(120, 130, 150, 0.06);
+}
+.pointeuse-agent {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+.pointeuse-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(90, 140, 220, 0.12);
+    color: #75a9ef;
+    font-size: 12px;
+    font-weight: 700;
+}
+.pointeuse-agent-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.pointeuse-agent-name {
+    font-size: 13px;
+    font-weight: 650;
+}
+.pointeuse-agent-matricule {
+    font-size: 11px;
+    opacity: 0.55;
+}
+.pointeuse-grade {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 9px;
+    border-radius: 6px;
+    background: rgba(90, 140, 220, 0.12);
+    color: #75a9ef;
+    font-size: 11px;
+    font-weight: 650;
+    white-space: nowrap;
+}
+.pointeuse-taux {
+    font-weight: 700;
+    font-size: 13px;
+    white-space: nowrap;
+}
+.pointeuse-taux small {
+    font-size: 11px;
+    font-weight: 400;
+    opacity: 0.55;
+}
+.pointeuse-heures {
+    width: 105px;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 9px 12px;
+    border: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
+    border-radius: 8px;
+    background: rgba(120, 130, 150, 0.06);
+    color: inherit;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.15s, background 0.15s;
+}
+.pointeuse-heures:focus {
+    border-color: #75a9ef;
+    background: rgba(90, 140, 220, 0.07);
+}
+.pointeuse-heures::placeholder {
+    opacity: 0.4;
+}
+.pointeuse-prime {
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.pointeuse-prime-empty {
+    opacity: 0.4;
+    font-weight: 400;
+}
+.pointeuse-empty {
+    padding: 30px 16px !important;
+    text-align: center;
+    opacity: 0.65;
+}
+@media (max-width: 700px) {
+    .modal:has(.pointeuse-wrapper) {
+        width: calc(100vw - 20px);
+        max-height: 95vh;
+    }
+    .pointeuse-table {
+        min-width: 680px;
+    }
+    .pointeuse-header {
+        align-items: flex-start;
+    }
 }

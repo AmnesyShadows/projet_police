@@ -16,6 +16,15 @@ function createLayout(options = {}) {
 
     document.body.innerHTML = `
 
+        <div id="app-loader">
+            <img
+                src="../assets/images/loader.gif"
+                alt="Chargement..."
+            >
+
+            <span>Chargement...</span>
+        </div>
+
         <div class="app">
 
             <!-- ============================================ -->
@@ -155,6 +164,56 @@ function createLayout(options = {}) {
     }
 
 }
+
+// ========================================================
+// LOADER
+// ========================================================
+
+const loaderStartTime = Date.now();
+
+window.addEventListener(
+    "load",
+    () => {
+
+        const loader =
+            document.getElementById(
+                "app-loader"
+            );
+
+        if (!loader) {
+            return;
+        }
+
+        const elapsed =
+            Date.now() - loaderStartTime;
+
+        const minimumDuration = 500;
+
+        const remainingTime =
+            Math.max(
+                0,
+                minimumDuration - elapsed
+            );
+
+        setTimeout(
+            () => {
+
+                loader.classList.add(
+                    "hidden"
+                );
+
+                setTimeout(
+                    () => loader.remove(),
+                    350
+                );
+
+            },
+            remainingTime
+        );
+
+    },
+    { once: true }
+);
 
 // ============================================================
 // GENERATION DU MENU

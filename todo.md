@@ -12,38 +12,5 @@ Q*2%LYZ*CSa+D9!
 8. D'autre choses par la suite
 
 
-1. supprimer le actif dans agent. Il ne sert plus a rien avec le Statut
-
-const menuConfig = [
-    {
-        title: "General",
-        menu: [
-            {
-                title: "Agents",
-                icon: "icon",
-                page: "agents.html",
-                index: True
-            },
-            {
-                title: "Armes",
-                icon: "icon",
-                page: "armes.html"
-            }
-        ]
-    },
-    {
-        title: "PArametre",
-        menu: [
-            {
-                title: "PAge",
-                icon: "icon",
-                page: "page.html"
-            },
-            {
-                title: "Paghe 2",
-                icon: "icon"
-                page: "page2.html"
-            }
-        ]
-    }
-]
+1. Filtrer sur les agents En Service etc.
+3. Modifié les thead pour qu'ils soient tous avec des filtres ASC ou DESC

@@ -12,16 +12,85 @@ const agentsConfig = {
             },
             {
                 key: "nom",
-                label: "Nom"
-            },
-            {
-                key: "prenom",
-                label: "Prénom"
+                label: "Nom",
+                render: (value, row) => {
+                    return row.prenom + " " + row.nom.toUpperCase()
+                }
             },
             {
                 key: "grades",
                 label: "Grade",
-                render: value => value?.nom ?? "—"
+                render: value =>
+                    value?.nom
+                        ? createBadge(
+                            value.nom,
+                            "accent"
+                        ).outerHTML
+                        : "—"
+            },
+            {
+                key: "divisions",
+                label: "Divisions",
+                render: value => {
+                    if (
+                        !value ||
+                        value.length === 0
+                    ) {
+                        return "—";
+                    }
+
+                    return value
+                        .map(
+                            division =>
+                                createBadge(
+                                    division.label ??
+                                        division.nom,
+                                    division.couleur ??
+                                        "default"
+                                ).outerHTML
+                        )
+                        .join(" ");
+                }
+            },
+            {
+                key: "formations",
+                label: "Formations",
+                render: value => {
+                    if (
+                        !value ||
+                        value.length === 0
+                    ) {
+                        return "—";
+                    }
+
+                    return value
+                        .map(
+                            formation =>
+                                createBadge(
+                                    formation.label ??
+                                        formation.nom,
+                                    "default"
+                                ).outerHTML
+                        )
+                        .join(" ");
+                }
+            },
+            {
+                key: "ppa",
+                label: "PPA",
+                render: (value, row) => {
+                    const count =
+                        Number(Boolean(row.ppa_1)) +
+                        Number(Boolean(row.ppa_2)) +
+                        Number(Boolean(row.ppa_3));
+
+                    return count > 0
+                        ? createBadge(
+                            `PPA ${count}/3`,
+                            "accent"
+                        ).outerHTML
+                        : "—";
+                }
             },
             {
                 key: "statut",
@@ -49,7 +118,8 @@ const agentsConfig = {
                 buttons: [
                     "show",
                     "edit",
-                    "delete"
+                    "delete",
+                    "suivi"
                 ]
             }
         ]
@@ -462,7 +532,7 @@ const agentsConfig = {
             key: "identite",
             title: "Identité",
             icon: "👤",
-            width: 2,
+            width: 1,
             fields: [
                 {
                     name: "prenom",
@@ -492,7 +562,7 @@ const agentsConfig = {
             key: "carriere",
             title: "Carrière",
             icon: "📈",
-            width: 2,
+            width: 1,
             fields: [
                 {
                     name: "grade",
@@ -559,7 +629,7 @@ const agentsConfig = {
             key: "coordonnees",
             title: "Coordonnées",
             icon: "📞",
-            width: 2,
+            width: 1,
             fields: [
                 {
                     name: "telephone",
@@ -581,7 +651,7 @@ const agentsConfig = {
             key: "informations",
             title: "Informations",
             icon: "ℹ️",
-            width: 2,
+            width: 1,
             fields: [
                 {
                     name: "blame",
@@ -630,7 +700,7 @@ const agentsConfig = {
             key: "ppa",
             title: "PPA",
             icon: "📚",
-            width: 2,
+            width: 1,
             fields: [
                 {
                     name: "ppa_1",
@@ -655,22 +725,7 @@ const agentsConfig = {
                 }
             ]
         },
-        {
-            key: "notes",
-            title: "Notes internes",
-            icon: "📝",
-            width: 2,
-            fields: [
-                {
-                    name: "notes_internes",
-                    label: "Notes internes",
-                    edit: true,
-                    type: "textarea",
-                    placeholder: "Ex : Ma note interne...",
-                    width: 4
-                }
-            ]
-        },
+        
         /*
          * ========================================================
          * RELATIONS
@@ -684,22 +739,48 @@ const agentsConfig = {
             key: "armements",
             title: "Armements",
             icon: "🔫",
-            width: 2,
+            width: 1,
             modal: "armements"
-        },
-        {
-            key: "formations",
-            title: "Formations",
-            icon: "🎓",
-            width: 2,
-            modal: "formations"
         },
         {
             key: "divisions",
             title: "Divisions",
             icon: "🎖️",
-            width: 2,
+            width: 1,
             modal: "divisions"
+        },
+        {
+            key: "formations",
+            title: "Formations",
+            icon: "🎓",
+            width: 1,
+            modal: "formations"
+        },
+        {
+            key: "notes",
+            title: "Notes internes",
+            icon: "📝",
+            width: 4,
+            fields: [
+                {
+                    name: "notes_internes",
+                    label: "Notes internes",
+                    edit: true,
+                    type: "textarea",
+                    placeholder: "Ex : Ma note interne...",
+                    width: 4
+                }
+            ]
+        },
+        {
+            key: "activite",
+            title: "Activité",
+            subtitle: "Primes hebdomadaires",
+            icon: "📈",
+            width: 4,
+            highcharts: {
+                render: "renderAgentPrimeChart"
+            }
         }
 
     ]

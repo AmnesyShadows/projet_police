@@ -70,6 +70,19 @@ async function loadAgents() {
         return;
     }
 
+    await Promise.all(
+        data.map(async agent => {
+            agent.divisions =
+                await fetchAgentDivisions(
+                    agent.id
+                );
+            agent.formations =
+                await fetchAgentFormations(
+                    agent.id
+                );
+        })
+    );
+
     const pageSubtitle =
         document.querySelector(".page-subtitle");
 
@@ -81,7 +94,7 @@ async function loadAgents() {
     const table =
         createTable({
             config: agentsConfig,
-            data,
+            data: data,
             columns:
                 agentsConfig.list.columns,
 
@@ -230,7 +243,42 @@ async function loadAgents() {
     }
 
     container.innerHTML = "";
-    container.appendChild(table);
+
+    const toolbar =
+        table.querySelector(
+            ".table-toolbar"
+        );
+
+    if (toolbar) {
+        const pointeuseButton =
+            document.createElement(
+                "button"
+            );
+
+        pointeuseButton.type =
+            "button";
+
+        pointeuseButton.className =
+            "btn-table-new";
+
+        pointeuseButton.textContent =
+            "📋 Pointeuse";
+
+        pointeuseButton.addEventListener(
+            "click",
+            () => {
+                openPointeuseModal();
+            }
+        );
+
+        toolbar.appendChild(
+            pointeuseButton
+        );
+    }
+
+    container.appendChild(
+        table
+    );
 }
 
 // ============================================================
@@ -522,7 +570,16 @@ function createAgentCard(
             cardConfig.width ?? 1,
         content,
         footer: null,
-        headerActions
+        headerActions,
+        highcharts:
+            cardConfig.highcharts
+                ? {
+                    ...cardConfig.highcharts,
+                    agentId:
+                        agent.id,
+                    agent
+                }
+                : null
     });
 }
 
@@ -960,13 +1017,8 @@ function openAddFormationModal(
     });
 }
 
-// ============================================================
-// FORMATIONS AGENT
-// ============================================================
-
-async function loadAgentFormations(
-    agentId,
-    container
+async function fetchAgentFormations(
+    agentId
 ) {
     const {
         data: associations,
@@ -989,48 +1041,14 @@ async function loadAgentFormations(
             associationsError
         );
 
-        container.innerHTML = "";
-
-        const message =
-            document.createElement(
-                "div"
-            );
-
-        message.className =
-            "specialized-card-placeholder";
-
-        message.textContent =
-            "Impossible de récupérer les formations.";
-
-        container.appendChild(
-            message
-        );
-
-        return;
+        return [];
     }
-
-    container.innerHTML = "";
 
     if (
         !associations ||
         associations.length === 0
     ) {
-        const message =
-            document.createElement(
-                "div"
-            );
-
-        message.className =
-            "specialized-card-placeholder";
-
-        message.textContent =
-            "Aucune formation attribuée.";
-
-        container.appendChild(
-            message
-        );
-
-        return;
+        return [];
     }
 
     const formationIds = [
@@ -1047,22 +1065,7 @@ async function loadAgentFormations(
     if (
         formationIds.length === 0
     ) {
-        const message =
-            document.createElement(
-                "div"
-            );
-
-        message.className =
-            "specialized-card-placeholder";
-
-        message.textContent =
-            "Aucune formation attribuée.";
-
-        container.appendChild(
-            message
-        );
-
-        return;
+        return [];
     }
 
     const {
@@ -1093,24 +1096,7 @@ async function loadAgentFormations(
             formationsError
         );
 
-        container.innerHTML = "";
-
-        const message =
-            document.createElement(
-                "div"
-            );
-
-        message.className =
-            "specialized-card-placeholder";
-
-        message.textContent =
-            "Impossible de récupérer les formations.";
-
-        container.appendChild(
-            message
-        );
-
-        return;
+        return [];
     }
 
     const formationsById =
@@ -1123,17 +1109,64 @@ async function loadAgentFormations(
             )
         );
 
-    associations.forEach(
-        association => {
+    return associations
+        .map(association => {
             const formation =
                 formationsById.get(
                     association.formation_id
                 );
 
             if (!formation) {
-                return;
+                return null;
             }
 
+            return {
+                ...formation,
+                label:
+                    `${formation.icon ?? ""}${formation.icon ? " " : ""}${formation.nom}`
+            };
+        })
+        .filter(Boolean);
+}
+
+// ============================================================
+// FORMATIONS AGENT
+// ============================================================
+
+async function loadAgentFormations(
+    agentId,
+    container
+) {
+    container.innerHTML = "";
+
+    const formations =
+        await fetchAgentFormations(
+            agentId
+        );
+
+    if (
+        formations.length === 0
+    ) {
+        const message =
+            document.createElement(
+                "div"
+            );
+
+        message.className =
+            "specialized-card-placeholder";
+
+        message.textContent =
+            "Aucune formation attribuée.";
+
+        container.appendChild(
+            message
+        );
+
+        return;
+    }
+
+    formations.forEach(
+        formation => {
             const item =
                 document.createElement(
                     "div"
@@ -1144,10 +1177,10 @@ async function loadAgentFormations(
 
             const badge =
                 createBadge(
-                    `${formation.icon ?? ""}${formation.icon ? " " : ""}${formation.nom}`,
+                    formation.label,
                     "default"
                 );
-            
+
             badge.classList.add(
                 "agent-division-large-badge"
             );
@@ -1196,7 +1229,7 @@ async function loadAgentFormations(
                             )
                             .eq(
                                 "formation_id",
-                                association.formation_id
+                                formation.id
                             );
 
                     if (error) {
@@ -1209,7 +1242,8 @@ async function loadAgentFormations(
                             "Impossible de retirer cette formation.",
                             "danger",
                             {
-                                title: "Erreur"
+                                title:
+                                    "Erreur"
                             }
                         );
 
@@ -1246,14 +1280,12 @@ async function loadAgentFormations(
         }
     );
 }
-
 // ============================================================
 // DIVISIONS AGENT
 // ============================================================
 
-async function loadAgentDivisions(
-    agentId,
-    container
+async function fetchAgentDivisions(
+    agentId
 ) {
     const {
         data: associations,
@@ -1278,48 +1310,14 @@ async function loadAgentDivisions(
             associationsError
         );
 
-        container.innerHTML = "";
-
-        const message =
-            document.createElement(
-                "div"
-            );
-
-        message.className =
-            "specialized-card-placeholder";
-
-        message.textContent =
-            "Impossible de récupérer les divisions.";
-
-        container.appendChild(
-            message
-        );
-
-        return;
+        return [];
     }
-
-    container.innerHTML = "";
 
     if (
         !associations ||
         associations.length === 0
     ) {
-        const message =
-            document.createElement(
-                "div"
-            );
-
-        message.className =
-            "specialized-card-placeholder";
-
-        message.textContent =
-            "Aucune division attribuée.";
-
-        container.appendChild(
-            message
-        );
-
-        return;
+        return [];
     }
 
     const divisionIds = [
@@ -1336,22 +1334,7 @@ async function loadAgentDivisions(
     if (
         divisionIds.length === 0
     ) {
-        const message =
-            document.createElement(
-                "div"
-            );
-
-        message.className =
-            "specialized-card-placeholder";
-
-        message.textContent =
-            "Aucune division attribuée.";
-
-        container.appendChild(
-            message
-        );
-
-        return;
+        return [];
     }
 
     const {
@@ -1377,24 +1360,7 @@ async function loadAgentDivisions(
             divisionsError
         );
 
-        container.innerHTML = "";
-
-        const message =
-            document.createElement(
-                "div"
-            );
-
-        message.className =
-            "specialized-card-placeholder";
-
-        message.textContent =
-            "Impossible de récupérer les divisions.";
-
-        container.appendChild(
-            message
-        );
-
-        return;
+        return [];
     }
 
     const divisionsById =
@@ -1407,24 +1373,16 @@ async function loadAgentDivisions(
             )
         );
 
-    associations.forEach(
-        association => {
+    return associations
+        .map(association => {
             const division =
                 divisionsById.get(
                     association.division_id
                 );
 
             if (!division) {
-                return;
+                return null;
             }
-
-            const item =
-                document.createElement(
-                    "div"
-                );
-
-            item.className =
-                "specialized-card-item";
 
             let label =
                 division.nom ?? "—";
@@ -1441,9 +1399,69 @@ async function loadAgentDivisions(
                     `CO-LEAD ${label}`;
             }
 
+            return {
+                ...division,
+                lead: Boolean(
+                    association.lead
+                ),
+                co_lead: Boolean(
+                    association.co_lead
+                ),
+                label
+            };
+        })
+        .filter(Boolean);
+}
+
+// ============================================================
+// DIVISIONS AGENT
+// ============================================================
+
+async function loadAgentDivisions(
+    agentId,
+    container
+) {
+    container.innerHTML = "";
+
+    const divisions =
+        await fetchAgentDivisions(
+            agentId
+        );
+
+    if (
+        divisions.length === 0
+    ) {
+        const message =
+            document.createElement(
+                "div"
+            );
+
+        message.className =
+            "specialized-card-placeholder";
+
+        message.textContent =
+            "Aucune division attribuée.";
+
+        container.appendChild(
+            message
+        );
+
+        return;
+    }
+
+    divisions.forEach(
+        division => {
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "specialized-card-item";
+
             const badge =
                 createBadge(
-                    label,
+                    division.label,
                     division.couleur ||
                         "default"
                 );
@@ -1498,7 +1516,7 @@ async function loadAgentDivisions(
                             )
                             .eq(
                                 "division_id",
-                                association.division_id
+                                division.id
                             );
 
                     if (error) {
@@ -1819,6 +1837,350 @@ async function loadAgentArmements(
 }
 
 // ============================================================
+// GRAPHIQUE ACTIVITE AGENT
+// ============================================================
+
+async function renderAgentPrimeChart({
+    container,
+    agentId
+}) {
+    if (
+        typeof Highcharts === "undefined"
+    ) {
+        container.innerHTML = "";
+
+        const message =
+            document.createElement("div");
+
+        message.className =
+            "specialized-card-placeholder";
+
+        message.textContent =
+            "Highcharts n'est pas chargé.";
+
+        container.appendChild(
+            message
+        );
+
+        return;
+    }
+
+    container.innerHTML = "";
+
+    const {
+        data: pointages,
+        error
+    } = await supabaseClient
+        .from("pointages")
+        .select(`
+            agent_id,
+            annee,
+            semaine,
+            heures,
+            minutes,
+            taux_horaire
+        `)
+        .order("annee", {
+            ascending: true
+        })
+        .order("semaine", {
+            ascending: true
+        });
+
+    if (error) {
+        console.error(
+            "Erreur récupération pointages pour le graphique :",
+            error
+        );
+
+        const message =
+            document.createElement("div");
+
+        message.className =
+            "specialized-card-placeholder";
+
+        message.textContent =
+            "Impossible de récupérer les données d'activité.";
+
+        container.appendChild(
+            message
+        );
+
+        return;
+    }
+
+    if (
+        !pointages ||
+        pointages.length === 0
+    ) {
+        const message =
+            document.createElement("div");
+
+        message.className =
+            "specialized-card-placeholder";
+
+        message.textContent =
+            "Aucune donnée de pointage disponible.";
+
+        container.appendChild(
+            message
+        );
+
+        return;
+    }
+
+    /*
+    ============================================================
+    CALCUL DES PRIMES
+    ============================================================
+    */
+
+    const weeks = new Map();
+
+    pointages.forEach(
+        pointage => {
+            const annee =
+                Number(
+                    pointage.annee
+                );
+
+            const semaine =
+                Number(
+                    pointage.semaine
+                );
+
+            const heures =
+                Number(
+                    pointage.heures
+                ) || 0;
+
+            const minutes =
+                Number(
+                    pointage.minutes
+                ) || 0;
+
+            const taux =
+                Number(
+                    pointage.taux_horaire
+                ) || 0;
+
+            const totalHeures =
+                heures +
+                minutes / 60;
+
+            const prime =
+                totalHeures *
+                taux;
+
+            const key =
+                `${annee}-${String(
+                    semaine
+                ).padStart(2, "0")}`;
+
+            if (
+                !weeks.has(key)
+            ) {
+                weeks.set(
+                    key,
+                    {
+                        annee,
+                        semaine,
+                        primes: []
+                    }
+                );
+            }
+
+            weeks
+                .get(key)
+                .primes
+                .push({
+                    agentId:
+                        String(
+                            pointage.agent_id
+                        ),
+                    prime
+                });
+        }
+    );
+
+    /*
+    ============================================================
+    TRI DES SEMAINES
+    ============================================================
+    */
+
+    const sortedWeeks =
+        [...weeks.values()]
+            .sort(
+                (a, b) =>
+                    a.annee - b.annee ||
+                    a.semaine - b.semaine
+            );
+
+    /*
+    ============================================================
+    AXE X
+    ============================================================
+    */
+
+    const categories =
+        sortedWeeks.map(
+            week =>
+                `${week.annee} • S${week.semaine}`
+        );
+
+    /*
+    ============================================================
+    PRIME DE L'AGENT
+    ============================================================
+    */
+
+    const agentSeries =
+        sortedWeeks.map(
+            week => {
+                const agentPrime =
+                    week.primes.find(
+                        item =>
+                            item.agentId ===
+                            String(agentId)
+                    );
+
+                if (
+                    !agentPrime
+                ) {
+                    return null;
+                }
+
+                return Number(
+                    agentPrime.prime.toFixed(2)
+                );
+            }
+        );
+
+    /*
+    ============================================================
+    MOYENNE DE TOUS LES AGENTS
+    ============================================================
+    */
+
+    const averageSeries =
+        sortedWeeks.map(
+            week => {
+                if (
+                    week.primes.length === 0
+                ) {
+                    return null;
+                }
+
+                const total =
+                    week.primes.reduce(
+                        (
+                            sum,
+                            item
+                        ) =>
+                            sum +
+                            item.prime,
+                        0
+                    );
+
+                const average =
+                    total /
+                    week.primes.length;
+
+                return Number(
+                    average.toFixed(2)
+                );
+            }
+        );
+
+    /*
+    ============================================================
+    HIGHCHARTS
+    ============================================================
+    */
+
+    Highcharts.chart(
+        container,
+        {
+            chart: {
+                type: "line",
+                height: 320
+            },
+
+            title: {
+                text: null
+            },
+
+            credits: {
+                enabled: false
+            },
+
+            xAxis: {
+                categories,
+
+                title: {
+                    text: "Semaine"
+                }
+            },
+
+            yAxis: {
+                title: {
+                    text: "Prime"
+                },
+
+                labels: {
+                    formatter() {
+                        return `${this.value} $`;
+                    }
+                }
+            },
+
+            tooltip: {
+                shared: true,
+
+                valueDecimals: 2,
+
+                valueSuffix: " $"
+            },
+
+            legend: {
+                enabled: true,
+                align: "center",
+                verticalAlign: "bottom",
+                layout: "horizontal",
+                itemStyle: {
+                    color: "var(--text-secondary)",
+                    fontWeight: "500"
+                },
+                itemHoverStyle: {
+                    color: "var(--accent)"
+                }
+            },
+                        plotOptions: {
+                series: {
+                    connectNulls: false
+                }
+            },
+
+            series: [
+                {
+                    name: "Agent",
+                    data: agentSeries,
+                    color: "var(--accent)",
+                    dashStyle: "Solid"
+                },
+                {
+                    name: "Moyenne agents",
+                    data: averageSeries,
+                    color: "var(--text-secondary)",
+                    dashStyle: "Dash"
+                }
+            ]
+        }
+    );
+}
+
+// ============================================================
 // AFFICHAGE DES VALEURS
 // ============================================================
 
@@ -2033,6 +2395,658 @@ function escapeAgentHtml(
             "'",
             "&#039;"
         );
+}
+
+// ============================================================
+// POINTEUSE
+// ============================================================
+
+async function openPointeuseModal() {
+    const now = new Date();
+
+    const getISOWeek = date => {
+        const target = new Date(date.valueOf());
+
+        const dayNumber =
+            (date.getDay() + 6) % 7;
+
+        target.setDate(
+            target.getDate() - dayNumber + 3
+        );
+
+        const firstThursday =
+            new Date(
+                target.getFullYear(),
+                0,
+                4
+            );
+
+        return (
+            1 +
+            Math.round(
+                (
+                    target -
+                    firstThursday
+                ) /
+                604800000
+            )
+        );
+    };
+
+    const weekStart = [
+        now.getFullYear(),
+        String(now.getMonth() + 1).padStart(2, "0"),
+        String(now.getDate()).padStart(2, "0")
+    ].join("-");
+
+    const semaineActuelle =
+        getISOWeek(now);
+
+    const {
+        data: agents,
+        error: agentsError
+    } = await supabaseClient
+        .from("agents")
+        .select(`
+            *,
+            grades (
+                id,
+                nom,
+                priority
+            )
+        `)
+        .order("matricule", {
+            ascending: true
+        });
+
+    if (agentsError) {
+        console.error(
+            "Erreur récupération agents pour la pointeuse :",
+            agentsError
+        );
+
+        createAlert(
+            "Impossible de récupérer les agents.",
+            "danger",
+            {
+                title: "Erreur"
+            }
+        );
+
+        return;
+    }
+
+    const gradesIds = [
+        ...new Set(
+            (agents ?? [])
+                .map(agent => agent.grade)
+                .filter(Boolean)
+        )
+    ];
+
+    let tauxHoraires = [];
+
+    if (gradesIds.length > 0) {
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .from("taux_horaires")
+            .select(`
+                id,
+                grade,
+                taux
+            `)
+            .in("grade", gradesIds);
+
+        if (error) {
+            console.error(
+                "Erreur récupération taux horaires :",
+                error
+            );
+
+            createAlert(
+                "Impossible de récupérer les taux horaires.",
+                "danger",
+                {
+                    title: "Erreur"
+                }
+            );
+
+            return;
+        }
+
+        tauxHoraires = data ?? [];
+    }
+
+    const tauxByGrade = new Map(
+        tauxHoraires.map(taux => [
+            taux.grade,
+            taux.taux
+        ])
+    );
+
+    const agentsSorted = [...(agents ?? [])].sort(
+        (a, b) => {
+            const priorityA =
+                a.grades?.priority ?? 999;
+
+            const priorityB =
+                b.grades?.priority ?? 999;
+
+            return priorityA - priorityB ||
+                a.matricule - b.matricule;
+        }
+    );
+
+    const formatMoney = value =>
+        new Intl.NumberFormat("fr-FR", {
+            maximumFractionDigits: 0
+        }).format(
+            Math.round(value)
+        ) + " $";
+
+    createModal({
+        config: {
+            create: {
+                fields: [
+                    {
+                        name: "semaine",
+                        label: "Semaine",
+                        type: "date",
+                        required: true,
+                        width: 4
+                    }
+                ]
+            }
+        },
+
+        data: {
+            semaine: weekStart
+        },
+
+        mode: "create",
+        title: "Pointeuse hebdomadaire",
+
+        content: container => {
+            container.className = "modal-field-full";
+
+            const wrapper =
+                document.createElement("div");
+
+            wrapper.className =
+                "pointeuse-wrapper";
+
+            const header =
+                document.createElement("div");
+
+            header.className =
+                "pointeuse-header";
+
+            const headerInfo =
+                document.createElement("div");
+
+            headerInfo.className =
+                "pointeuse-header-info";
+
+            const heading =
+                document.createElement("h4");
+
+            heading.textContent =
+                "Pointage des agents";
+
+            const description =
+                document.createElement("p");
+
+            description.textContent =
+                "Saisis les heures travaillées pour chaque agent.";
+
+            headerInfo.appendChild(heading);
+            headerInfo.appendChild(description);
+
+            const count =
+                document.createElement("span");
+
+            count.className =
+                "pointeuse-count";
+
+            count.textContent =
+                `${agentsSorted.length} agent${agentsSorted.length > 1 ? "s" : ""}`;
+
+            header.appendChild(headerInfo);
+            header.appendChild(count);
+
+            wrapper.appendChild(header);
+
+            const tableContainer =
+                document.createElement("div");
+
+            tableContainer.className =
+                "pointeuse-table-container";
+
+            const table =
+                document.createElement("table");
+
+            table.className =
+                "pointeuse-table";
+
+            const thead =
+                document.createElement("thead");
+
+            const headerRow =
+                document.createElement("tr");
+
+            [
+                "Agent",
+                "Grade",
+                "Taux horaire",
+                "Heures",
+                "Prime"
+            ].forEach(label => {
+                const th =
+                    document.createElement("th");
+
+                th.textContent = label;
+
+                headerRow.appendChild(th);
+            });
+
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            const tbody =
+                document.createElement("tbody");
+
+            agentsSorted.forEach(agent => {
+                const row =
+                    document.createElement("tr");
+
+                // AGENT
+                const agentCell =
+                    document.createElement("td");
+
+                const agentWrapper =
+                    document.createElement("div");
+
+                agentWrapper.className =
+                    "pointeuse-agent";
+
+                const avatar =
+                    document.createElement("div");
+
+                avatar.className =
+                    "pointeuse-avatar";
+
+                const initiales =
+                    `${(agent.prenom ?? "").charAt(0)}${(agent.nom ?? "").charAt(0)}`;
+
+                avatar.textContent =
+                    initiales.toUpperCase();
+
+                const agentInfo =
+                    document.createElement("div");
+
+                agentInfo.className =
+                    "pointeuse-agent-info";
+
+                const agentName =
+                    document.createElement("span");
+
+                agentName.className =
+                    "pointeuse-agent-name";
+
+                agentName.textContent =
+                    `${agent.prenom ?? ""} ${agent.nom ?? ""}`;
+
+                const matricule =
+                    document.createElement("span");
+
+                matricule.className =
+                    "pointeuse-agent-matricule";
+
+                matricule.textContent =
+                    `Matricule #${agent.matricule}`;
+
+                agentInfo.appendChild(agentName);
+                agentInfo.appendChild(matricule);
+
+                agentWrapper.appendChild(avatar);
+                agentWrapper.appendChild(agentInfo);
+
+                agentCell.appendChild(agentWrapper);
+
+                // GRADE
+                const gradeCell =
+                    document.createElement("td");
+
+                gradeCell.innerHTML =
+                    agent.grades?.nom
+                        ? createBadge(
+                            agent.grades.nom,
+                            "accent"
+                        ).outerHTML
+                        : "—";
+
+                // TAUX HORAIRE
+                const tauxCell =
+                    document.createElement("td");
+
+                const taux =
+                    tauxByGrade.get(agent.grade);
+
+                const tauxLabel =
+                    document.createElement("span");
+
+                tauxLabel.className =
+                    "pointeuse-taux";
+
+                if (
+                    taux !== undefined &&
+                    taux !== null
+                ) {
+                    tauxLabel.textContent =
+                        `${taux} $`;
+
+                    const tauxUnit =
+                        document.createElement("small");
+
+                    tauxUnit.textContent =
+                        " / h";
+
+                    tauxLabel.appendChild(tauxUnit);
+                } else {
+                    tauxLabel.textContent = "—";
+                }
+
+                tauxCell.appendChild(tauxLabel);
+
+                // HEURES
+                const heuresCell =
+                    document.createElement("td");
+
+                const heuresInput =
+                    document.createElement("input");
+
+                heuresInput.type = "text";
+
+                heuresInput.className =
+                    "pointeuse-heures";
+
+                heuresInput.placeholder =
+                    "3h20";
+
+                heuresInput.autocomplete =
+                    "off";
+
+                heuresInput.dataset.agentId =
+                    agent.id;
+
+                heuresInput.setAttribute(
+                    "aria-label",
+                    `Heures de ${agent.prenom} ${agent.nom}`
+                );
+
+                heuresCell.appendChild(heuresInput);
+
+                // PRIME
+                const primeCell =
+                    document.createElement("td");
+
+                const primeLabel =
+                    document.createElement("span");
+
+                primeLabel.className =
+                    "pointeuse-prime pointeuse-prime-empty";
+
+                primeLabel.textContent =
+                    "—";
+
+                primeCell.appendChild(primeLabel);
+
+                // CALCUL VISUEL
+                heuresInput.addEventListener(
+                    "input",
+                    () => {
+                        const value =
+                            heuresInput.value.trim();
+
+                        if (value === "") {
+                            heuresInput.style.borderColor = "";
+                            primeLabel.textContent = "—";
+                            primeLabel.classList.add(
+                                "pointeuse-prime-empty"
+                            );
+                            return;
+                        }
+
+                        const match = value.match(
+                            /^(\d+)\s*h\s*(\d{1,2})?$/i
+                        );
+
+                        if (!match) {
+                            heuresInput.style.borderColor =
+                                "#e57373";
+
+                            primeLabel.textContent =
+                                "Format invalide";
+
+                            primeLabel.classList.remove(
+                                "pointeuse-prime-empty"
+                            );
+
+                            return;
+                        }
+
+                        const heures =
+                            Number(match[1]);
+
+                        const minutes =
+                            Number(match[2] ?? 0);
+
+                        if (minutes > 59) {
+                            heuresInput.style.borderColor =
+                                "#e57373";
+
+                            primeLabel.textContent =
+                                "Minutes invalides";
+
+                            return;
+                        }
+
+                        heuresInput.style.borderColor = "";
+
+                        if (
+                            taux === undefined ||
+                            taux === null
+                        ) {
+                            primeLabel.textContent =
+                                "Taux manquant";
+
+                            return;
+                        }
+
+                        const prime =
+                            (heures + minutes / 60) *
+                            Number(taux);
+
+                        primeLabel.textContent =
+                            formatMoney(prime);
+
+                        primeLabel.classList.remove(
+                            "pointeuse-prime-empty"
+                        );
+                    }
+                );
+
+                row.appendChild(agentCell);
+                row.appendChild(gradeCell);
+                row.appendChild(tauxCell);
+                row.appendChild(heuresCell);
+                row.appendChild(primeCell);
+
+                tbody.appendChild(row);
+            });
+
+            if (agentsSorted.length === 0) {
+                const emptyRow =
+                    document.createElement("tr");
+
+                const emptyCell =
+                    document.createElement("td");
+
+                emptyCell.colSpan = 5;
+
+                emptyCell.className =
+                    "pointeuse-empty";
+
+                emptyCell.textContent =
+                    "Aucun agent trouvé.";
+
+                emptyRow.appendChild(emptyCell);
+                tbody.appendChild(emptyRow);
+            }
+
+            table.appendChild(tbody);
+            tableContainer.appendChild(table);
+            wrapper.appendChild(tableContainer);
+            container.appendChild(wrapper);
+        },
+
+        onSave: async values => {
+            const inputs =
+                document.querySelectorAll(
+                    ".pointeuse-heures"
+                );
+
+            const pointages = [];
+
+            inputs.forEach(input => {
+                const value =
+                    input.value.trim();
+
+                if (!value) {
+                    return;
+                }
+
+                const match =
+                    value.match(
+                        /^(\d+)\s*h\s*(\d{1,2})?$/i
+                    );
+
+                if (!match) {
+                    return;
+                }
+
+                const heures =
+                    Number(match[1]);
+
+                const minutes =
+                    Number(match[2] ?? 0);
+
+                if (
+                    minutes < 0 ||
+                    minutes > 59
+                ) {
+                    return;
+                }
+
+                const agentId =
+                    input.dataset.agentId;
+
+                const agent =
+                    agentsSorted.find(
+                        item =>
+                            item.id === agentId
+                    );
+
+                if (!agent) {
+                    return;
+                }
+
+                const taux =
+                    tauxByGrade.get(
+                        agent.grade
+                    );
+
+                if (
+                    taux === undefined ||
+                    taux === null
+                ) {
+                    return;
+                }
+
+                const semaineDate =
+                    new Date(
+                        `${values.semaine}T12:00:00`
+                    );
+
+                const annee =
+                    semaineDate.getFullYear();
+
+                const semaine =
+                    getISOWeek(semaineDate);
+
+                pointages.push({
+                    agent_id: agent.id,
+                    annee,
+                    semaine,
+                    heures,
+                    minutes,
+                    taux_horaire: Number(taux)
+                });
+            });
+
+            if (pointages.length === 0) {
+                createAlert(
+                    "Aucun pointage à enregistrer.",
+                    "warning",
+                    {
+                        title: "Pointeuse"
+                    }
+                );
+
+                return;
+            }
+
+            const {
+                error
+            } =
+                await supabaseClient
+                    .from("pointages")
+                    .upsert(
+                        pointages,
+                        {
+                            onConflict:
+                                "agent_id,annee,semaine"
+                        }
+                    );
+
+            if (error) {
+                console.error(
+                    "Erreur enregistrement pointages :",
+                    error
+                );
+
+                createAlert(
+                    "Impossible d'enregistrer les pointages.",
+                    "danger",
+                    {
+                        title: "Erreur"
+                    }
+                );
+
+                return;
+            }
+
+            createAlert(
+                `${pointages.length} pointage${pointages.length > 1 ? "s" : ""} enregistré${pointages.length > 1 ? "s" : ""} avec succès.`,
+                "success",
+                {
+                    title: "Pointeuse"
+                }
+            );
+        }
+    });
 }
 
 // ============================================================

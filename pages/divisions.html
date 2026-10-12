@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>BCSO — Divisions</title>
+
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/components.css">
+
+</head>
+
+
+<body>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="../js/core/supabase.js"></script>
+
+
+<!-- ============================================================
+     COMPONENTS
+     ============================================================ -->
+<script src="../js/config/menu.config.js"></script>
+
+<script src="../js/components/layout.js"></script>
+<script src="../js/components/cards.js"></script>
+<script src="../js/components/table.js"></script>
+<script src="../js/components/modal.js"></script>
+<script src="../js/components/title.js"></script>
+<script src="../js/components/badge.js"></script>
+<script src="../js/components/alert.js"></script>
+
+<!-- ============================================================
+     CONFIG
+     ============================================================ -->
+
+<script src="../js/config/divisions.config.js"></script>
+
+<!-- ============================================================
+     PAGE
+     ============================================================ -->
+
+<script src="../js/pages/divisions.js"></script>
+
+<script>
+
+    createLayout({
+        title: "Divisions",
+        subtitle: "Liste des divisions",
+        activePage: "divisions"
+    });
+
+
+    const pageContent =
+        document.querySelector(".page-content");
+
+
+    /*
+     * TITRE
+     */
+
+    pageContent.appendChild(
+        createPageTitle(
+            "Divisions",
+            "Liste des divisions enregistrées"
+        )
+    );
+
+
+    /*
+     * CONTENEUR LISTE
+     */
+
+    const tableContainer =
+        document.createElement("div");
+
+    tableContainer.id =
+        "divisions-table";
+
+    pageContent.appendChild(
+        tableContainer
+    );
+
+    const ficheContainer =
+        document.createElement("div");
+
+    ficheContainer.id =
+        "division-fiche";
+
+    ficheContainer.style.display =
+        "none";
+
+    pageContent.appendChild(
+        ficheContainer
+    );
+
+</script>
+
+
+</body>
+
+</html>
