@@ -5,10 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portail BCSO</title>
-    <meta http-equiv="refresh" content="0; url=pages/connexion.html">
 </head>
 <body>
     <p>Redirection vers le portail BCSO...</p>
-    <a href="pages/connexion.html">Accéder à la connexion</a>
+
+    <script>
+        window.location.replace(
+            window.location.origin +
+            "/projet_police/pages/connexion.html"
+        );
+    </script>
 </body>
 </html>
