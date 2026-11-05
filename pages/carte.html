@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>BCSO — Carte</title>
+
+    <!-- Styles V2 -->
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/carte.css">
+
+    <!-- Leaflet : affichage de la carte -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+</head>
+
+<body>
+
+    <!-- Supabase V2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/core/supabase.js"></script>
+    <script src="../js/config/permissions.config.js"></script>
+    <script src="../js/core/permissions.js"></script>
+
+    <!-- Configuration du menu et composants communs V2 -->
+    <script src="../js/config/menu.config.js"></script>
+
+    <script src="../js/components/layout.js"></script>
+    <script src="../js/components/cards.js"></script>
+    <script src="../js/components/table.js"></script>
+    <script src="../js/components/modal.js"></script>
+    <script src="../js/components/title.js"></script>
+    <script src="../js/components/badge.js"></script>
+    <script src="../js/components/alert.js"></script>
+
+    <!-- Leaflet -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Logique de la page Carte V2 -->
+    <script src="../js/pages/carte.js"></script>
+
+    <script>
+        /*
+         * INITIALISATION DU LAYOUT V2
+         */
+        createLayout({
+            title: "Carte",
+            subtitle: "Carte des lieux et des zones",
+            activePage: "carte"
+        });
+
+        const pageContent = document.querySelector(".page-content");
+
+        /*
+         * TITRE DE PAGE
+         */
+        pageContent.appendChild(
+            createPageTitle(
+                "Carte",
+                "Visualisation des lieux et des zones"
+            )
+        );
+
+        /*
+         * STRUCTURE DE LA CARTE
+         */
+        const carteLayout = document.createElement("div");
+        carteLayout.className = "carte-page-layout";
+        carteLayout.id = "carte-page-layout";
+
+        // Zone principale de la carte
+        const carteMain = document.createElement("div");
+        carteMain.className = "carte-main";
+
+        const carteMap = document.createElement("div");
+        carteMap.id = "carte-map";
+        carteMap.setAttribute("role", "application");
+        carteMap.setAttribute(
+            "aria-label",
+            "Carte interactive des lieux et des zones"
+        );
+
+        carteMain.appendChild(carteMap);
+
+        // Bouton pour rétracter les filtres
+        const filtersToggle = document.createElement("button");
+        filtersToggle.type = "button";
+        filtersToggle.id = "toggle-carte-filters";
+        filtersToggle.className = "carte-filter-toggle";
+        filtersToggle.textContent = "›";
+        filtersToggle.setAttribute(
+            "aria-label",
+            "Masquer le panneau des filtres"
+        );
+        filtersToggle.setAttribute("aria-expanded", "true");
+        filtersToggle.setAttribute("aria-controls", "carte-filters");
+
+        // Panneau de filtres à droite
+        const filtersPanel = document.createElement("aside");
+        filtersPanel.id = "carte-filters";
+        filtersPanel.setAttribute(
+            "aria-label",
+            "Filtres de la carte"
+        );
+
+        const filtersTitle = document.createElement("h2");
+        filtersTitle.className = "carte-filters-title";
+        filtersTitle.textContent = "Filtres";
+
+        const filtersContent = document.createElement("div");
+        filtersContent.id = "carte-filters-content";
+        filtersContent.className = "carte-filters-content";
+
+        filtersPanel.appendChild(filtersTitle);
+        filtersPanel.appendChild(filtersContent);
+
+        // Assemblage
+        carteLayout.appendChild(carteMain);
+        carteLayout.appendChild(filtersToggle);
+        carteLayout.appendChild(filtersPanel);
+
+        pageContent.appendChild(carteLayout);
+
+        /*
+         * PANNEAU RÉTRACTABLE
+         */
+        filtersToggle.addEventListener("click", () => {
+
+            const isCollapsed =
+                filtersPanel.classList.toggle("is-collapsed");
+
+            filtersToggle.textContent = isCollapsed ? "‹" : "›";
+
+            filtersToggle.setAttribute(
+                "aria-expanded",
+                String(!isCollapsed)
+            );
+
+            filtersToggle.setAttribute(
+                "aria-label",
+                isCollapsed
+                    ? "Afficher le panneau des filtres"
+                    : "Masquer le panneau des filtres"
+            );
+
+            // Redimensionnement de Leaflet après l'animation
+            window.setTimeout(() => {
+                if (window.carteMapInstance) {
+                    window.carteMapInstance.invalidateSize();
+                }
+            }, 280);
+        });
+    </script>
+
+</body>
+</html>

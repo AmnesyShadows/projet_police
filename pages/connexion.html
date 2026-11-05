@@ -1,0 +1,352 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion | Portail Agents</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            font-family: Inter, system-ui, sans-serif;
+            color: #f8fafc;
+            background:
+                radial-gradient(ellipse at top, #263354 0%, transparent 65%),
+                #0b1020;
+            position: relative;
+            isolation: isolate;
+            overflow-x: hidden;
+        }
+
+        
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image: url("../assets/images/logo.png");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: min(110vw, 1250px);
+            opacity: 0.12;
+            filter: grayscale(35%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+
+        
+        .login-card {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 420px;
+            padding: 40px 32px;
+            text-align: center;
+            background: rgba(21, 28, 45, 0.94);
+            border: 1px solid #303b52;
+            border-radius: 20px;
+            box-shadow: 0 24px 80px #0007;
+            backdrop-filter: blur(8px);
+        }
+
+
+        .logo {
+            width: 76px;
+            height: 76px;
+            margin: 0 auto 24px;
+            display: grid;
+            place-items: center;
+            border-radius: 22px;
+            background: #5865f2;
+            font-size: 38px;
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: 27px;
+        }
+
+        .description {
+            margin: 0 0 28px;
+            color: #aab5c8;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        #discordLogin {
+            width: 100%;
+            min-height: 52px;
+            padding: 14px 18px;
+            border: 0;
+            border-radius: 10px;
+            background: #5865f2;
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .2s, transform .2s;
+        }
+
+        #discordLogin:hover {
+            background: #4752c4;
+            transform: translateY(-1px);
+        }
+
+        #discordLogin:disabled {
+            opacity: .65;
+            cursor: wait;
+            transform: none;
+        }
+
+        #status {
+            display: none;
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 9px;
+            font-size: 13px;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        #status.visible {
+            display: block;
+        }
+
+        #status.error {
+            color: #fecaca;
+            background: #ef44441a;
+            border: 1px solid #ef444440;
+        }
+
+        #status.info {
+            color: #bfdbfe;
+            background: #3b82f61a;
+            border: 1px solid #3b82f640;
+        }
+
+        .footer {
+            margin-top: 26px;
+            color: #77849a;
+            font-size: 12px;
+        }
+
+        
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        
+        @media (max-width: 600px) {
+            body::before {
+                background-size: 145vw;
+                opacity: 0.09;
+            }
+
+            .login-card {
+                padding: 32px 24px;
+            }
+        }
+
+
+
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/core/supabase.js"></script>
+</head>
+
+<body>
+    <main class="login-card">
+        <!-- <div class="logo" aria-hidden="true">👮</div> -->
+        <!-- <div class="logo" aria-hidden="true">
+            <img src="../assets/images/logo.png" alt="">
+        </div> -->
+        <div class="logo" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="60" height="60"
+                fill="white" aria-hidden="true">
+                <path d="M19.73 5.14A18.4 18.4 0 0 0 15.2 3.75l-.57 1.16a16.7 16.7 0 0 0-5.26 0L8.8 3.75a18.3 18.3 0 0 0-4.53 1.39C1.4 9.38.62 13.52 1.01 17.6a18.5 18.5 0 0 0 5.55 2.8l1.2-1.96a12 12 0 0 1-1.89-.91l.46-.36a13.2 13.2 0 0 0 11.34 0l.46.36a12 12 0 0 1-1.89.91l1.2 1.96a18.5 18.5 0 0 0 5.55-2.8c.46-4.73-.79-8.83-3.26-12.46ZM8.55 15.08c-1.1 0-2-1-2-2.23s.88-2.23 2-2.23 2.02 1.02 2 2.23c0 1.23-.88 2.23-2 2.23Zm6.9 0c-1.1 0-2-1-2-2.23s.88-2.23 2-2.23 2.02 1.02 2 2.23c0 1.23-.88 2.23-2 2.23Z"/>
+            </svg>
+        </div>
+
+        <h1>Bienvenue</h1>
+
+        <p class="description">
+            Connecte-toi avec Discord pour accéder au portail
+            et aux fonctionnalités autorisées selon ton grade.
+        </p>
+
+        <button id="discordLogin" type="button">
+            Se connecter avec Discord
+        </button>
+
+        <div id="status" role="status" aria-live="polite"></div>
+
+        <div class="footer">
+            Accès réservé aux agents autorisés.
+        </div>
+    </main>
+
+    <script>
+        
+        const loginButton =
+            document.getElementById("discordLogin");
+
+        const statusBox =
+            document.getElementById("status");
+
+        function showStatus(message, type = "info") {
+            statusBox.textContent = message;
+            statusBox.className = `visible ${type}`;
+        }
+
+        
+        function getDiscordId(user) {
+            console.log("Utilisateur Supabase :", user);
+            console.log("Métadonnées utilisateur :", user.user_metadata);
+            console.log("Identités :", user.identities);
+
+            const identity = user.identities?.find(
+                item => item.provider === "discord"
+            );
+
+            const discordId =
+                user.user_metadata?.provider_id ??
+                user.user_metadata?.sub ??
+                identity?.identity_data?.provider_id ??
+                identity?.identity_data?.sub ??
+                identity?.id ??
+                null;
+
+            console.log("Identifiant Discord récupéré :", discordId);
+
+            return discordId ? String(discordId) : null;
+        }
+
+        async function verifyAgent(user) {
+            const discordId = getDiscordId(user);
+
+            if (!discordId) {
+                showStatus(
+                    "Impossible de récupérer ton identifiant Discord.",
+                    "error"
+                );
+                return false;
+            }
+
+            const { data: agent, error } = await supabaseClient
+                .from("agents")
+                .select("id, prenom, nom, grade, discord_id")
+                .eq("discord_id", discordId)
+                .maybeSingle();
+
+            console.log("Discord ID recherché :", discordId);
+            console.log("Agent trouvé :", agent);
+            console.log("Erreur Supabase :", error);
+
+            if (error) {
+                console.error("Erreur recherche agent :", error);
+
+                showStatus(
+                    "Impossible de vérifier ton autorisation. Vérifie les permissions Supabase.",
+                    "error"
+                );
+                return false;
+            }
+
+            if (!agent) {
+                await supabaseClient.auth.signOut();
+
+                showStatus(
+                    "Ton compte Discord n'est associé à aucun agent autorisé. Contacte un administrateur.",
+                    "error"
+                );
+                return false;
+            }
+
+            console.log("Agent autorisé :", agent.prenom, agent.nom, agent.grade);
+
+            return true;
+        }
+
+        loginButton.addEventListener("click", async () => {
+            loginButton.disabled = true;
+            showStatus("Redirection vers Discord...");
+
+            // Détermine automatiquement l'environnement
+            const isLocal = ["localhost", "127.0.0.1"].includes(
+                window.location.hostname
+            );
+
+            const redirectUrl = isLocal
+                ? `${window.location.origin}${window.location.pathname}`
+                : "https://TON-DOMAINE.fr/connexion.html";
+
+            const { error } =
+                await supabaseClient.auth.signInWithOAuth({
+                    provider: "discord",
+                    options: {
+                        redirectTo: redirectUrl
+                    }
+                });
+
+            if (error) {
+                console.error("Erreur OAuth Discord :", error);
+
+                showStatus(
+                    "Connexion impossible. Vérifie la configuration Discord et Supabase.",
+                    "error"
+                );
+
+                loginButton.disabled = false;
+            }
+        });
+
+        async function init() {
+            const { data, error } =
+                await supabaseClient.auth.getSession();
+
+            if (error) {
+                showStatus(
+                    "Impossible de vérifier la session.",
+                    "error"
+                );
+                return;
+            }
+
+            const user = data.session?.user;
+
+            if (!user) return;
+
+            loginButton.disabled = true;
+            showStatus("Vérification de ton compte...");
+
+            const authorized = await verifyAgent(user);
+
+            if (!authorized) {
+                loginButton.disabled = false;
+                return;
+            }
+
+            showStatus("Connexion réussie. Redirection...");
+
+            window.location.replace("./agents.html");
+        }
+
+        init();
+    </script>
+</body>
+</html>

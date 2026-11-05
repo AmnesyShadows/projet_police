@@ -16,6 +16,7 @@ const formationsConfig = {
     },
     create: {
         title: "Nouvelle formation",
+        // permission: "formations.create",
         fields: [
             {
                 name: "nom",

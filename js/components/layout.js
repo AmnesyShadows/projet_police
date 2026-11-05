@@ -102,29 +102,26 @@ function createLayout(options = {}) {
 
                     </div>
 
-                    <div class="header-right">
+                        <div class="header-right">
 
-                        <div class="user-profile">
+                            <div class="user-profile">
 
-                            <div class="user-avatar">
-                                ?
-                            </div>
+                                <div class="user-avatar" id="layout-user-avatar">
+                                    ?
+                                </div>
 
-                            <div class="user-info">
-
-                                <strong>
-                                    Utilisateur
-                                </strong>
-
-                                <span>
-                                    Chargement...
-                                </span>
+                                <div class="user-info">
+                                    <strong id="layout-user-name">Utilisateur</strong>
+                                    <span id="layout-user-grade">Chargement...</span>
+                                </div>
 
                             </div>
+
+                            <button id="logoutButton" class="btn-table delete" type="button">
+                                Déconnexion
+                            </button>
 
                         </div>
-
-                    </div>
 
                 </header>
 
@@ -162,6 +159,10 @@ function createLayout(options = {}) {
         }
 
     }
+    
+    initLogoutButton();
+    loadLayoutUser();
+    applyMenuPermissions();
 
 }
 
@@ -264,6 +265,7 @@ function renderMenu() {
                                 href="${escapeLayoutHtml(item.page)}"
                                 class="nav-link"
                                 data-page="${escapeLayoutHtml(page)}"
+                                data-permission="${escapeLayoutHtml(item.permission ?? "")}"
                             >
                                 <span class="nav-icon">
                                     ${item.icon ?? ""}
@@ -298,6 +300,57 @@ function renderMenu() {
             `;
         })
         .join("");
+}
+
+// ============================================================
+// PERMISSIONS DU MENU
+// ============================================================
+
+async function applyMenuPermissions() {
+
+    if (typeof Permissions === "undefined") {
+        console.error("Le système Permissions est introuvable.");
+        return;
+    }
+
+    const links = document.querySelectorAll(
+        ".sidebar-nav .nav-link[data-permission]"
+    );
+
+    for (const link of links) {
+
+        const permission = link.dataset.permission;
+
+        try {
+            const allowed = await Permissions.can(permission);
+            link.hidden = !allowed;
+
+        } catch (error) {
+            console.error(
+                "Erreur permission menu :",
+                permission,
+                error
+            );
+
+            link.hidden = true;
+        }
+    }
+
+    // Masquer les sections qui n'ont aucun lien visible
+    const sections = document.querySelectorAll(
+        ".sidebar-nav .nav-section"
+    );
+
+    sections.forEach(section => {
+
+        const visibleLinks = [
+            ...section.querySelectorAll(".nav-link")
+        ].filter(link => !link.hidden);
+
+        section.hidden = visibleLinks.length === 0;
+    });
+
+    document.querySelector(".sidebar-nav")?.classList.add("permissions-loaded");
 }
 
 // ============================================================
@@ -359,4 +412,121 @@ function escapeLayoutHtml(value) {
             "'",
             "&#039;"
         );
+}
+
+async function loadLayoutUser() {
+    const nameElement = document.getElementById("layout-user-name");
+    const gradeElement = document.getElementById("layout-user-grade");
+    const avatarElement = document.getElementById("layout-user-avatar");
+
+    if (!nameElement || !gradeElement || !avatarElement) return;
+
+    try {
+        const { data: sessionData, error: sessionError } =
+            await supabaseClient.auth.getSession();
+
+        if (sessionError) throw sessionError;
+
+        const user = sessionData.session?.user;
+        
+        if (!user) {
+            window.location.replace("./connexion.html");
+            return;
+        }
+
+        const identity = user.identities?.find(
+            item => item.provider === "discord"
+        );
+
+        const discordId = String(
+            user.user_metadata?.provider_id ??
+            user.user_metadata?.sub ??
+            identity?.identity_data?.provider_id ??
+            identity?.identity_data?.sub ??
+            identity?.id ??
+            ""
+        );
+
+        if (!discordId) {
+            nameElement.textContent = user.user_metadata?.full_name ?? "Agent";
+            gradeElement.textContent = "ID Discord introuvable";
+            return;
+        }
+
+        
+        const { data: agent, error } = await supabaseClient
+            .from("agents")
+            .select(`
+                prenom,
+                nom,
+                discord_id,
+                grade:grades (
+                    nom
+                )
+            `)
+            .eq("discord_id", discordId)
+            .maybeSingle();
+
+
+        if (error) throw error;
+
+        if (!agent) {
+            nameElement.textContent = user.user_metadata?.full_name ?? "Agent";
+            gradeElement.textContent = "Agent non trouvé";
+            return;
+        }
+
+        nameElement.textContent =
+            [agent.prenom, agent.nom].filter(Boolean).join(" ") ||
+            user.user_metadata?.full_name ||
+            "Agent";
+
+        gradeElement.textContent = agent.grade?.nom || "Agent";
+
+        const avatarUrl = user.user_metadata?.avatar_url;
+
+        if (avatarUrl) {
+            const img = document.createElement("img");
+            img.src = avatarUrl;
+            img.alt = "Avatar Discord";
+            img.referrerPolicy = "no-referrer";
+
+            img.style.width = "100%";
+            img.style.height = "100%";
+            img.style.objectFit = "cover";
+            img.style.borderRadius = "50%";
+
+            avatarElement.replaceChildren(img);
+        } else {
+            avatarElement.textContent =
+                (agent.prenom || agent.nom || "A").charAt(0).toUpperCase();
+        }
+
+    } catch (error) {
+        console.error("Erreur chargement profil :", error);
+        nameElement.textContent = "Agent";
+        gradeElement.textContent = "Erreur de chargement";
+    }
+}
+
+async function initLogoutButton() {
+    const logoutButton = document.getElementById("logoutButton");
+
+    if (!logoutButton) return;
+
+    logoutButton.addEventListener("click", async () => {
+        logoutButton.disabled = true;
+
+        try {
+            const { error } = await supabaseClient.auth.signOut();
+
+            if (error) throw error;
+
+            window.location.replace("./connexion.html");
+        } catch (error) {
+            console.error("Erreur de déconnexion :", error);
+            alert("Impossible de se déconnecter. Réessaie.");
+            logoutButton.disabled = false;
+        }
+    });
 }

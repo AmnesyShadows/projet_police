@@ -64,42 +64,45 @@ function createTable(options = {}) {
         "table-toolbar";
 
 
-    if (
-        config.list?.newButton === true
-    ) {
+    if (config.list?.newButton === true) {
 
-        const newButton =
-            document.createElement("button");
+        const newButton = document.createElement("button");
 
-        newButton.type =
-            "button";
-
-        newButton.className =
-            "btn-table-new";
-
+        newButton.type = "button";
+        newButton.className = "btn-table-new";
         newButton.textContent =
             `+ ${config.create?.title ?? "Nouveau"}`;
 
+        newButton.hidden = true;
 
-        newButton.addEventListener(
-            "click",
-            () => {
+        newButton.addEventListener("click", () => {
+            handleTableNew(config, onCreate);
+        });
 
-                handleTableNew(
-                    config,
-                    onCreate
+        toolbar.appendChild(newButton);
+
+        (async () => {
+            const permission = config.list?.newButtonPermission;
+
+            if (!permission) {
+                newButton.hidden = false;
+                return;
+            }
+
+            try {
+                const allowed = await Permissions.can(permission);
+                newButton.hidden = !allowed;
+            } catch (error) {
+                console.error(
+                    "Erreur vérification permission :",
+                    permission,
+                    error
                 );
 
+                newButton.hidden = true;
             }
-        );
-
-
-        toolbar.appendChild(
-            newButton
-        );
-
+        })();
     }
-
 
     wrapper.appendChild(
         toolbar
@@ -232,140 +235,137 @@ function createTable(options = {}) {
                         );
 
 
-                        column.buttons.forEach(
-                            buttonType => {
+                        column.buttons.forEach(buttonItem => {
 
-                                const buttonConfig =
-                                    tableButtons[
-                                        buttonType
-                                    ];
+                            // Compatibilité avec les anciens boutons en texte
+                            const buttonOptions = typeof buttonItem === "string"
+                                ? { key: buttonItem }
+                                : buttonItem;
 
+                            const buttonType = buttonOptions?.key;
 
-                                /*
-                                ------------------------------------------------
-                                BOUTON INCONNU
-                                ------------------------------------------------
-                                */
+                            if (!buttonType) {
+                                console.warn("Configuration de bouton invalide :", buttonItem);
+                                return;
+                            }
 
-                                if (
-                                    !buttonConfig
-                                ) {
+                            const buttonConfig = tableButtons[buttonType];
 
-                                    console.warn(
-                                        `Bouton table inconnu : ${buttonType}`
-                                    );
+                            // Un bouton personnalisé doit posséder une action
+                            if (!buttonConfig && typeof buttonOptions.action !== "function") {
+                                console.warn(`Bouton table inconnu : ${buttonType}`);
+                                return;
+                            }
 
-                                    return;
+                            const button = document.createElement("button");
 
+                            button.type = "button";
+
+                            button.className = buttonConfig
+                                ? buttonConfig.className
+                                : "btn-table other";
+
+                            button.textContent = buttonOptions.label ??
+                                buttonConfig?.label ??
+                                buttonType;
+
+                            // Ajout facultatif d'une icône personnalisée
+                            if (buttonOptions.icon) {
+                                button.textContent =
+                                    `${buttonOptions.icon} ${button.textContent}`;
+                            }
+
+                            // Masquer immédiatement les boutons protégés
+                            const permission = buttonOptions.permission;
+                            const permissionCheck = buttonOptions.permissionCheck;
+
+                            button.hidden = Boolean(permission || permissionCheck);
+
+                            td.appendChild(button);
+
+                            // Vérification de la permission
+                            if (permission) {
+                                (async () => {
+                                    try {
+                                        const allowed = await Permissions.can(permission);
+                                        button.hidden = !allowed;
+                                    } catch (error) {
+                                        console.error(
+                                            "Erreur de permission du bouton :",
+                                            permission,
+                                            error
+                                        );
+
+                                        button.hidden = true;
+                                    }
+                                })();
+                            }
+
+                            if (permissionCheck) {
+                                (async () => {
+                                    try {
+                                        const allowed = await permissionCheck(row);
+                                        button.hidden = !allowed;
+                                    } catch (error) {
+                                        console.error(
+                                            "Erreur vérification accès Suivis :",
+                                            error
+                                        );
+
+                                        button.hidden = true;
+                                    }
+                                })();
+                            }
+
+                            button.addEventListener("click", async event => {
+
+                                event.stopPropagation();
+
+                                // Nouvelle vérification au moment du clic
+                                if (permission) {
+                                    const allowed = await Permissions.can(permission);
+
+                                    if (!allowed) {
+                                        button.hidden = true;
+                                        return;
+                                    }
                                 }
 
+                                if (permissionCheck) {
+                                    const allowed = await permissionCheck(row);
 
-                                /*
-                                ------------------------------------------------
-                                CRÉATION DU BOUTON
-                                ------------------------------------------------
-                                */
-
-                                const button =
-                                    document.createElement(
-                                        "button"
-                                    );
-
-
-                                button.type =
-                                    "button";
-
-                                button.className =
-                                    buttonConfig.className;
-
-                                button.textContent =
-                                    buttonConfig.label;
-
-
-                                /*
-                                ------------------------------------------------
-                                ACTION DU BOUTON
-                                ------------------------------------------------
-                                */
-
-                                button.addEventListener(
-                                    "click",
-                                    async event => {
-
-                                        event.stopPropagation();
-
-
-                                        /*
-                                        ========================================
-                                        SHOW
-                                        ========================================
-                                        */
-
-                                        if (
-                                            buttonType ===
-                                            "show"
-                                        ) {
-
-                                            handleTableShow(
-                                                config,
-                                                row
-                                            );
-
-                                            return;
-
-                                        }
-
-
-                                        /*
-                                        ========================================
-                                        EDIT
-                                        ========================================
-                                        */
-
-                                        if (
-                                            buttonType ===
-                                            "edit"
-                                        ) {
-
-                                            handleTableEdit(
-                                                config,
-                                                row,
-                                                onEdit
-                                            );
-
-                                            return;
-
-                                        }
-
-
-                                        /*
-                                        ========================================
-                                        DELETE
-                                        ========================================
-                                        */
-
-                                        if (
-                                            buttonType ===
-                                            "delete"
-                                        ) {
-
-                                            await handleTableDelete(
-                                                row,
-                                                onDelete
-                                            );
-
-                                        }
-
+                                    if (!allowed) {
+                                        button.hidden = true;
+                                        return;
                                     }
-                                );
+                                }
 
+                                // Action personnalisée
+                                if (typeof buttonOptions.action === "function") {
+                                    await buttonOptions.action(row);
+                                    return;
+                                }
 
-                                td.appendChild(
-                                    button
-                                );
+                                // Bouton Voir
+                                if (buttonType === "show") {
+                                    handleTableShow(config, row);
+                                    return;
+                                }
 
-                            }
-                        );
+                                // Bouton Modifier
+                                if (buttonType === "edit") {
+                                    handleTableEdit(config, row, onEdit);
+                                    return;
+                                }
+
+                                // Bouton Supprimer
+                                if (buttonType === "delete") {
+                                    await handleTableDelete(row, onDelete);
+                                }
+
+                            });
+
+                        });
 
                     }
 

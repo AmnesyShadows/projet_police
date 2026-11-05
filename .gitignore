@@ -1,0 +1,7 @@
+
+# Stockage local et fichiers associés
+/storage/
+storage/
+
+# Documentation privée
+ceremonie.md

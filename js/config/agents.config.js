@@ -5,6 +5,7 @@ const agentsConfig = {
     },
     list: {
         newButton: true,
+        newButtonPermission: "agents.create",
         columns: [
             {
                 key: "matricule",
@@ -117,9 +118,30 @@ const agentsConfig = {
                 label: "Actions",
                 buttons: [
                     "show",
-                    "edit",
-                    "delete",
-                    "suivi"
+                    {
+                        key: "edit",
+                        permission: "agents.edit"
+                    },
+                    {
+                        key: "delete",
+                        permission: "agents.delete"
+                    },
+                    {
+                        key: "suivi",
+                        label: "Suivis",
+                        icon: "▤",
+                        permissionCheck: row =>
+                            Permissions.canAccessSuivi(row.id),
+                        action: async row => {
+                            const allowed =
+                                await Permissions.canAccessSuivi(row.id);
+
+                            if (!allowed) return;
+
+                            window.location.href =
+                                `suivis.html?id=${encodeURIComponent(row.id)}`;
+                        }
+                    }
                 ]
             }
         ]
@@ -201,6 +223,9 @@ const agentsConfig = {
                     label: "matricule",
                     orderBy: "nom",
                     ascending: true
+                },
+                render: (value, row) => {
+                    return row.prenom + " " + row.nom.toUpperCase()
                 }
             },
             {
@@ -533,6 +558,7 @@ const agentsConfig = {
             title: "Identité",
             icon: "👤",
             width: 1,
+            editPermission: "agents.edit",
             fields: [
                 {
                     name: "prenom",
@@ -563,6 +589,7 @@ const agentsConfig = {
             title: "Carrière",
             icon: "📈",
             width: 1,
+            editPermission: "agents.edit",
             fields: [
                 {
                     name: "grade",
@@ -630,6 +657,7 @@ const agentsConfig = {
             title: "Coordonnées",
             icon: "📞",
             width: 1,
+            editPermission: "agents.edit",
             fields: [
                 {
                     name: "telephone",
@@ -652,6 +680,7 @@ const agentsConfig = {
             title: "Informations",
             icon: "ℹ️",
             width: 1,
+            editPermission: "agents.edit",
             fields: [
                 {
                     name: "blame",
@@ -701,6 +730,7 @@ const agentsConfig = {
             title: "PPA",
             icon: "📚",
             width: 1,
+            editPermission: "agents.edit",
             fields: [
                 {
                     name: "ppa_1",
@@ -740,27 +770,37 @@ const agentsConfig = {
             title: "Armements",
             icon: "🔫",
             width: 1,
-            modal: "armements"
+            modal: "armements",
+            createPermission: "agents.create",
+            editPermission: "agents.edit",
+            deletePermission: "agents.delete"
         },
         {
             key: "divisions",
             title: "Divisions",
             icon: "🎖️",
             width: 1,
-            modal: "divisions"
+            modal: "divisions",
+            createPermission: "agents.create",
+            editPermission: "agents.edit",
+            deletePermission: "agents.delete"
         },
         {
             key: "formations",
             title: "Formations",
             icon: "🎓",
             width: 1,
-            modal: "formations"
+            modal: "formations",
+            createPermission: "agents.create",
+            editPermission: "agents.edit",
+            deletePermission: "agents.delete"
         },
         {
             key: "notes",
             title: "Notes internes",
             icon: "📝",
             width: 4,
+            editPermission: "agents.edit",
             fields: [
                 {
                     name: "notes_internes",

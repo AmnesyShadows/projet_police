@@ -351,6 +351,72 @@ function createCard(options = {}) {
     return card;
 }
 
+function addToCard(card, options = {}) {
+    const {
+        title = "",
+        subtitle = "",
+        icon = "",
+        content = ""
+    } = options;
+
+    
+    // Header de la section
+    if (title || icon || subtitle) {
+        const header = document.createElement("div");
+        header.className = "card-header";
+
+        const headerLeft = document.createElement("div");
+        headerLeft.className = "card-header-left";
+
+        if (icon) {
+            const iconElement = document.createElement("div");
+            iconElement.className = "card-icon";
+            iconElement.innerHTML = icon;
+            headerLeft.appendChild(iconElement);
+        }
+
+        // Même structure que createCard
+        if (title || subtitle) {
+            const textWrapper = document.createElement("div");
+
+            if (title) {
+                const heading = document.createElement("h3");
+                heading.textContent = title;
+                textWrapper.appendChild(heading);
+            }
+
+            if (subtitle) {
+                const description = document.createElement("div");
+                description.className = "card-subtitle";
+                description.innerHTML = subtitle;
+                textWrapper.appendChild(description);
+            }
+
+            headerLeft.appendChild(textWrapper);
+        }
+
+        header.appendChild(headerLeft);
+        card.appendChild(header);
+    }
+
+
+    // Contenu de la section
+    if (content !== null && content !== undefined && content !== "") {
+        const sectionContent = document.createElement("div");
+        sectionContent.className = "card-content";
+
+        if (content instanceof HTMLElement) {
+            sectionContent.appendChild(content);
+        } else {
+            sectionContent.innerHTML = String(content);
+        }
+
+        card.appendChild(sectionContent);
+    }
+
+    return card;
+}
+
 
 // ============================================================
 // SECURITE

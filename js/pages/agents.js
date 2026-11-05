@@ -249,7 +249,10 @@ async function loadAgents() {
             ".table-toolbar"
         );
 
-    if (toolbar) {
+    const canAccessPointeuse =
+        await Permissions.can("pointeuse.access");
+
+    if (toolbar && canAccessPointeuse) {
         const pointeuseButton =
             document.createElement(
                 "button"
@@ -449,6 +452,24 @@ function renderAgentFiche(agent) {
     );
 }
 
+async function canAgentCardAction(cardConfig, action) {
+    const permission = cardConfig[`${action}Permission`];
+
+    if (!permission) return true;
+
+    try {
+        return await Permissions.can(permission);
+    } catch (error) {
+        console.error(
+            "Erreur permission carte :",
+            permission,
+            error
+        );
+
+        return false;
+    }
+}
+
 // ============================================================
 // CREATION D'UNE CARD
 // ============================================================
@@ -527,36 +548,49 @@ function createAgentCard(
 
     let headerActions = null;
 
-    if (
-        editableFields.length > 0
-    ) {
-        const editButton =
-            document.createElement(
-                "button"
-            );
+    if (editableFields.length > 0) {
+        const editButton = document.createElement("button");
 
         editButton.type = "button";
+        editButton.className = "btn-card-edit";
+        editButton.textContent = "✎ Modifier";
 
-        editButton.className =
-            "btn-card-edit";
+        const permission = cardConfig.editPermission;
 
-        editButton.textContent =
-            "✎ Modifier";
+        editButton.hidden = Boolean(permission);
 
-        editButton.addEventListener(
-            "click",
-            event => {
-                event.stopPropagation();
-
-                openAgentCardEditModal(
-                    cardConfig,
-                    agent
-                );
+        (async () => {
+            if (!permission) {
+                editButton.hidden = false;
+                return;
             }
-        );
 
-        headerActions =
-            editButton;
+            try {
+                const allowed = await Permissions.can(permission);
+                editButton.hidden = !allowed;
+            } catch (error) {
+                console.error("Erreur permission carte :", permission, error);
+                editButton.hidden = true;
+            }
+        })();
+
+        editButton.addEventListener("click", async event => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (permission) {
+                const allowed = await Permissions.can(permission);
+
+                if (!allowed) {
+                    editButton.hidden = true;
+                    return;
+                }
+            }
+
+            openAgentCardEditModal(cardConfig, agent);
+        });
+
+        headerActions = editButton;
     }
 
     return createCard({
@@ -625,9 +659,19 @@ function createSpecializedAgentCard(
 
     addButton.addEventListener(
         "click",
-        event => {
+        async event => {
             event.preventDefault();
             event.stopPropagation();
+
+            const allowed = await canAgentCardAction(
+                cardConfig,
+                "create"
+            );
+
+            if (!allowed) {
+                addButton.hidden = true;
+                return;
+            }
 
             if (
                 cardConfig.key ===
@@ -670,6 +714,19 @@ function createSpecializedAgentCard(
     footer.appendChild(
         addButton
     );
+
+    const createPermission = cardConfig.createPermission;
+
+    addButton.hidden = Boolean(createPermission);
+
+    (async () => {
+        const allowed = await canAgentCardAction(
+            cardConfig,
+            "create"
+        );
+
+        addButton.hidden = !allowed;
+    })();
 
     const card =
         createCard({
@@ -1139,6 +1196,12 @@ async function loadAgentFormations(
 ) {
     container.innerHTML = "";
 
+    const canDelete =
+        await canAgentCardAction(
+            { deletePermission: "agents.edit" },
+            "delete"
+        );
+
     const formations =
         await fetchAgentFormations(
             agentId
@@ -1195,6 +1258,8 @@ async function loadAgentFormations(
 
             deleteButton.className =
                 "specialized-card-item-delete";
+            
+            deleteButton.hidden = !canDelete;
 
             deleteButton.textContent =
                 "×";
@@ -1423,6 +1488,12 @@ async function loadAgentDivisions(
 ) {
     container.innerHTML = "";
 
+    const canDelete =
+        await canAgentCardAction(
+            { deletePermission: "agents.edit" },
+            "delete"
+        );
+
     const divisions =
         await fetchAgentDivisions(
             agentId
@@ -1480,6 +1551,8 @@ async function loadAgentDivisions(
 
             deleteButton.className =
                 "specialized-card-item-delete";
+            
+            deleteButton.hidden = !canDelete;
 
             deleteButton.textContent =
                 "×";
@@ -1624,6 +1697,12 @@ async function loadAgentArmements(
 
     container.innerHTML = "";
 
+    const canDelete =
+            await canAgentCardAction(
+                { deletePermission: "agents.edit" },
+                "delete"
+            );
+
     if (
         !data ||
         data.length === 0
@@ -1746,6 +1825,8 @@ async function loadAgentArmements(
 
                     deleteButton.className =
                         "specialized-card-item-delete";
+
+                    deleteButton.hidden = !canDelete;
 
                     deleteButton.textContent =
                         "×";
@@ -1964,13 +2045,22 @@ async function renderAgentPrimeChart({
                     pointage.taux_horaire
                 ) || 0;
 
-            const totalHeures =
-                heures +
-                minutes / 60;
+            const totalHeures = heures + minutes / 60;
 
-            const prime =
-                totalHeures *
-                taux;
+            const plafond = taux * 30;
+
+            let prime = totalHeures * taux;
+
+            if (prime >= plafond) {
+                const heuresSupplementaires =
+                    totalHeures - plafond / taux;
+
+                const bonus = Math.floor(
+                    heuresSupplementaires / 10
+                ) * 500;
+
+                prime = plafond + bonus;
+            }
 
             const key =
                 `${annee}-${String(
@@ -2545,6 +2635,25 @@ async function openPointeuseModal() {
         }).format(
             Math.round(value)
         ) + " $";
+    
+    const calculerPrime = (totalHeures, taux) => {
+        const plafond = taux * 30;
+        const heuresPlafond = 30;
+
+        const primeBase = totalHeures * taux;
+
+        if (taux <= 0 || primeBase < plafond) {
+            return primeBase;
+        }
+
+        const heuresSupplementaires =
+            totalHeures - heuresPlafond;
+
+        const bonus =
+            Math.floor(heuresSupplementaires / 10) * 500;
+
+        return plafond + bonus;
+    };
 
     createModal({
         config: {
@@ -2640,6 +2749,7 @@ async function openPointeuseModal() {
                 "Agent",
                 "Grade",
                 "Taux horaire",
+                "Plafond",
                 "Heures",
                 "Prime"
             ].forEach(label => {
@@ -2760,6 +2870,20 @@ async function openPointeuseModal() {
 
                 tauxCell.appendChild(tauxLabel);
 
+                // PLAFOND
+                const plafondCell = document.createElement("td");
+
+                const plafondLabel = document.createElement("span");
+                plafondLabel.className = "pointeuse-plafond";
+
+                if (taux !== undefined && taux !== null) {
+                    plafondLabel.textContent = `${taux * 30} $`;
+                } else {
+                    plafondLabel.textContent = "—";
+                }
+
+                plafondCell.appendChild(plafondLabel);
+
                 // HEURES
                 const heuresCell =
                     document.createElement("td");
@@ -2865,9 +2989,13 @@ async function openPointeuseModal() {
                             return;
                         }
 
-                        const prime =
-                            (heures + minutes / 60) *
-                            Number(taux);
+                        const totalHeures =
+                            heures + minutes / 60;
+
+                        const prime = calculerPrime(
+                            totalHeures,
+                            Number(taux)
+                        );
 
                         primeLabel.textContent =
                             formatMoney(prime);
@@ -2881,6 +3009,7 @@ async function openPointeuseModal() {
                 row.appendChild(agentCell);
                 row.appendChild(gradeCell);
                 row.appendChild(tauxCell);
+                row.appendChild(plafondCell);
                 row.appendChild(heuresCell);
                 row.appendChild(primeCell);
 

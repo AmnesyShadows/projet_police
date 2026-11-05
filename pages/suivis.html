@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>BCSO — Suivis des agents</title>
+
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/components.css">
+
+</head>
+
+
+<body>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="../js/core/supabase.js"></script>
+<script src="../js/config/permissions.config.js"></script>
+<script src="../js/core/permissions.js"></script>
+
+<!-- ============================================================
+     HIGHCHARTS
+     ============================================================ -->
+<script src="https://cdn.jsdelivr.net/npm/highcharts@latest/highcharts.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highcharts@latest/highcharts-more.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highcharts@latest/modules/accessibility.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/offline-exporting.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<!-- ============================================================
+     COMPONENTS
+     ============================================================ -->
+<script src="../js/config/menu.config.js"></script>
+
+<script src="../js/components/layout.js"></script>
+<script src="../js/components/cards.js"></script>
+<script src="../js/components/table.js"></script>
+<script src="../js/components/modal.js"></script>
+<script src="../js/components/title.js"></script>
+<script src="../js/components/badge.js"></script>
+<script src="../js/components/alert.js"></script>
+
+<!-- ============================================================
+     CONFIG
+     ============================================================ -->
+
+<script src="../js/config/suivis.config.js"></script>
+
+<!-- ============================================================
+     PAGE
+     ============================================================ -->
+
+<script src="../js/pages/suivis-form.js"></script>
+<script src="../js/pages/suivis.js"></script>
+
+<script>
+
+    createLayout({
+        title: "Suivis des agents",
+        subtitle: "Liste des suivis des agents",
+        activePage: "suivis"
+    });
+
+
+    const pageContent =
+        document.querySelector(".page-content");
+
+
+    /*
+     * TITRE
+     */
+
+    pageContent.appendChild(
+        createPageTitle(
+            "Suivis des agents",
+            "Liste des suivis des agents enregistrés"
+        )
+    );
+
+
+    /*
+     * CONTENEUR LISTE
+     */
+
+    const tableContainer =
+        document.createElement("div");
+
+    tableContainer.id =
+        "suivis-table";
+
+    pageContent.appendChild(
+        tableContainer
+    );
+
+    const ficheContainer =
+        document.createElement("div");
+
+    ficheContainer.id =
+        "suivi-fiche";
+
+    ficheContainer.style.display =
+        "none";
+
+    pageContent.appendChild(
+        ficheContainer
+    );
+
+</script>
+
+
+</body>
+
+</html>

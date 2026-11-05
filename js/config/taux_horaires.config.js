@@ -2,6 +2,7 @@ const tauxHorairesConfig = {
     table: "grades",
     list: {
         newButton: true,
+        newButtonPermission: "taux_horaires.create",
         columns: [
             {
                 key: "grades",
