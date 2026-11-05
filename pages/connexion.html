@@ -286,14 +286,8 @@
             loginButton.disabled = true;
             showStatus("Redirection vers Discord...");
 
-            // Détermine automatiquement l'environnement
-            const isLocal = ["localhost", "127.0.0.1"].includes(
-                window.location.hostname
-            );
-
-            const redirectUrl = isLocal
-                ? `${window.location.origin}${window.location.pathname}`
-                : "https://TON-DOMAINE.fr/connexion.html";
+            const redirectUrl =
+                `${window.location.origin}${window.location.pathname}`;
 
             const { error } =
                 await supabaseClient.auth.signInWithOAuth({
